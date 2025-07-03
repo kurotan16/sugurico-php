@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ログの編集 | スグリコ</title>
+</head>
+<body>
+    <h1>ログの編集</h1>
+
+    <!-- th:objectでフォームとlogオブジェクトを紐付け -->
+    <form th:action="@{/logs/{id}/edit(id=${log.id})}" th:object="${log}" method="post">
+        <div style="margin-bottom: 10px;">
+            <label for="title">タイトル:</label><br>
+            <!-- th:fieldで既存のタイトルを表示 -->
+            <input type="text" th:field="*{title}" id="title" size="50">
+        </div>
+        <div>
+            <label for="content">本文:</label><br>
+            <!-- th:fieldで既存の本文を表示 -->
+            <textarea th:field="*{content}" id="content" rows="4" cols="50" required></textarea>
+        </div>
+        <button type="submit">更新する</button>
+    </form>
+
+    <hr>
+    <a th:href="@{/}">キャンセルしてトップページに戻る</a>
+</body>
+</html>

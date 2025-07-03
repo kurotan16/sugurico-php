@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>トップページ | スグリコ</title>
+</head>
+<body>
+    <h1>スグリコへようこそ！</h1>
+
+    <p>こんにちは、<span sec:authentication="name"></span> さん</p>
+
+    <!-- ログアウトフォーム -->
+    <form th:action="@{/logout}" method="post" style="display: inline;">
+        <button type="submit">ログアウト</button>
+    </form>
+
+    <a th:href="@{/profile}" style="margin-left: 10px;">プロフィール編集</a>
+
+    <hr>
+
+    <h2>新しいログを記録する</h2>
+    <form th:action="@{/logs}" th:object="${newLog}" method="post" enctype="multipart/form-data">
+        <!-- ★★★ タイトル入力欄を追加 ★★★ -->
+        <div style="margin-bottom: 10px;">
+            <label for="title">タイトル:</label><br>
+            <input type="text" th:field="*{title}" id="title" size="50" placeholder="今日のハイライトは？">
+        </div>
+        
+        <!-- ★★★ 本文入力欄 (labelを追加) ★★★ -->
+        <div>
+            <label for="content">本文:</label><br>
+            <textarea th:field="*{content}" id="content" rows="4" cols="50" placeholder="今日の出来事を記録しよう" required></textarea>
+        </div>
+
+        <!-- ★★★ 画像追加欄 ★★★ -->
+        <div style="margin-top: 10px;">
+            <label for="imageFiles">画像ファイル (複数選択可):</label><br> 
+            <!-- ★★★ multiple属性を追加し、nameを複数形に変更 ★★★ -->
+            <input type="file" name="imageFiles" id="imageFiles" accept="image/*" multiple>
+        </div>
+        <button type="submit">記録する</button>
+    </form>
+
+    <hr>
+
+    <h2>あなたのログ一覧</h2>
+    <div th:if="${#lists.isEmpty(logs)}">
+        <p>まだ記録がありません。</p>
+    </div>
+    <div th:unless="${#lists.isEmpty(logs)}">
+        <ul th:each="log : ${logs}">
+            <li>
+                <strong th:text="${#temporals.format(log.createdAt, 'yyyy/MM/dd HH:mm')}"></strong> - 
+                <strong th:text="${log.title}">タイトル</strong>
+                <a th:href="@{/logs/{id}/edit(id=${log.id})}" style="margin-left: 10px;">編集</a>
+        
+                <form th:action="@{/logs/{id}/delete(id=${log.id})}" method="post" style="display: inline; margin-left: 5px;">
+                    <button type="submit" onclick="return confirm('本当にこのログを削除しますか？');">削除</button>
+                </form>
+                
+                <br>
+                <!-- log.images に画像があればループして表示 -->
+                <div th:if="${not #lists.isEmpty(log.images)}" style="padding-left: 15px; margin-top: 5px;">
+                    <!-- 画像を横に並べるためのコンテナ -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <div th:each="image : ${log.images}">
+                            <img th:src="${image.imageUrl}" alt="ログの画像" style="max-width: 150px; max-height: 150px; object-fit: cover;">
+                        </div>
+                    </div>
+                </div>
+                <span th:text="${log.content}" style="padding-left: 15px;">本文</span>
+            </li>
+        </ul>
+    </div>
+
+</body>
+</html>
