@@ -21,7 +21,7 @@
             <div>
                 <label for="loginIdInput">ログインID:</label>
                 <input type="text" name="loginId" id="loginIdInput">
-                <div id = "loginLog"></div><!--これが重複したらダメ-->
+                <div id = "loginIdLog"></div><!--これが重複したらダメ-->
             </div>
             <div>
                 <label for="emailInput">メールアドレス:</label>

@@ -30,7 +30,6 @@ function passCheck() {
     } else {
         passwordLog.style.display = 'none';
     }
-
     // 確認用パスワードの一致チェック (入力がある場合のみ)
     if (confirm && password !== confirm) {
         confirmLog.textContent = "パスワードが一致しません。";
@@ -77,11 +76,18 @@ async function signInExecute() {
         if (checkResult.data.length > 0) {
             // もし何かしらのデータが返ってきたら、重複がある
             const existingData = checkResult.data[0];
+            let alertMessage = ""
             if (existingData.login_id === loginIdInput.value) {
-                alert("このログインIDは既に使用されています。");
-            } else if (existingData.mail === emailInput.value) {
-                alert("このメールアドレスは既に使用されています。");
+                alertMessage += "このログインIDは既に使用されています。";
+                
+             document.getElementById("loginIdLog").textContent = "このログインIDは既に使用されています。";
+                
+            } 
+            if (existingData.mail === emailInput.value) {
+                alertMessage += "このメールアドレスは既に使用されています。"
+                document.getElementById("emailLog").textContent = "このメールアドレスは既に使用されています。";
             }
+            alert(alertMessage);
             // 処理を中断
             return;
         }
