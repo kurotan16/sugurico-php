@@ -24,8 +24,15 @@
     <pre>
         <?php print_r($_SESSION)?>
     </pre>
-    <main>
-    </main>
+
+
+
+    <?php
+            if(isset($_SESSION['account'])){
+                echo '<a href="投稿系/php/forum_input.php">+</a>';
+            } 
+            
+            ?>
     <footer>
 
     </footer>
