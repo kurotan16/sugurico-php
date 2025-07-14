@@ -1,0 +1,34 @@
+<?php session_start(); ?>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <title>スグリコ - メインページ</title>
+</head>
+<body>
+    <header>
+        <nav>
+            <?php
+            if(isset($_SESSION['account'])){
+                echo '<a href="ログイン系/php/logout.php">ログアウト</a>';
+                echo '<a href="ログイン系/php/update.php">登録情報変更</a>';
+            } else {
+               echo '<a href="ログイン系/php/login.php">ログイン</a>';
+            }
+            
+            ?>
+        </nav>
+    </header>
+    <h1>ようこそ、スグリコへ！</h1>
+    <pre>
+        <?php print_r($_SESSION)?>
+    </pre>
+    <main>
+    </main>
+    <footer>
+
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
