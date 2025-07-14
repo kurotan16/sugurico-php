@@ -20,13 +20,13 @@ $_SESSION['signin_form']['password'] = $password;
 $_SESSION['signin_form']['errors'] = [];
 
 
-$stmt = $pdo -> prepare("SELECT 'login_id' FROM `users` WHERE 'login_id' = ?");
+$stmt = $pdo -> prepare("SELECT login_id FROM `users` WHERE login_id = ?");
 $stmt -> execute([$_REQUEST['login_id']]);
 if($stmt->rowCount() > 0){
     $_SESSION['signin_form']['errors']['login_id'] = "このログインIDは使われています。";
 }
 
-$stmt = $pdo -> prepare("SELECT 'email' FROM `users` WHERE 'email' = ?");
+$stmt = $pdo -> prepare("SELECT email FROM `users` WHERE email = ?");
 $stmt -> execute([$_REQUEST['email']]);
 if($stmt->rowCount() > 0){
     $_SESSION['signin_form']['errors']['email'] = "このメールアドレスは使われています。";
