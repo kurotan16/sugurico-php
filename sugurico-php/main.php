@@ -24,8 +24,12 @@
     <pre>
         <?php print_r($_SESSION)?>
     </pre>
-
-
+    <hr>
+    あなたの投稿
+        <!-- 最新三件 -->
+    <hr>
+    皆さんの投稿
+        <!-- 最新三件 -->
 
     <?php
             if(isset($_SESSION['account'])){
