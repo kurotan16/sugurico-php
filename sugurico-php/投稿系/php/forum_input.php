@@ -1,7 +1,7 @@
 <?php
 session_start();
 // ログインしていないユーザーはメインページにリダイレクト
-if (!isset($_SESSION['account']['user_id'])) {
+if (!isset($_SESSION["user_id"])) {
     header('Location: ../../main.php');
     exit;
 }

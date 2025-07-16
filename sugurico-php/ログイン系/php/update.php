@@ -1,7 +1,7 @@
 <!--  -->
 <?php session_start();
 require_once "../../base/getPDO.php";
-if(!isset($_SESSION['account'])){
+if(!isset($_SESSION["user_id"])){
     header('Location: ../../main.php');
 }
 
@@ -19,7 +19,7 @@ if(!isset($_SESSION['account'])){
         <header>
             <nav>
             <?php
-            if(isset($_SESSION['account'])){
+            if(isset($_SESSION["user_id"])){
                 echo '<a href="logout.php">ログアウト</a>';
             } else {
                 echo '<a href="login.php">ログイン</a>';
@@ -33,7 +33,7 @@ if(!isset($_SESSION['account'])){
         if (!isset($_SESSION['update_form']['name'])) {
             $pdo = getPDO();
             $stmt = $pdo->prepare('SELECT * FROM users WHERE user_id = ?');
-            $stmt->execute([$_SESSION["account"]["user_id"]]);
+            $stmt->execute([$_SESSION["user_id"]]);
             foreach ($stmt as $row) {
                 $_SESSION['update_form']['name'] = $row['name'];
                 $_SESSION['update_form']['user_name'] = $row['user_name'];

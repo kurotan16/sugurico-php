@@ -19,7 +19,7 @@ $stmt->execute([$login_id, $hashed_password]);
 
 if($stmt->rowCount() > 0) {
     foreach ($stmt as $row) {
-        $_SESSION["account"]["user_id"] = $row["user_id"];
+        $_SESSION["user_id"] = $row["user_id"];
         unset($_SESSION["login_form"]);
         header('Location: ../../main.php');
     }

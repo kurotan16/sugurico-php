@@ -1,6 +1,6 @@
 <!--  -->
 <?php session_start();
-if(!isset($_SESSION['account'])){
+if(!isset($_SESSION["user_id"])){
     header('Location: ../../main.php');
 }
 ?>
@@ -17,7 +17,7 @@ if(!isset($_SESSION['account'])){
         <header>
             <nav>
             <?php
-            if(isset($_SESSION['account'])){
+            if(isset($_SESSION["user_id"])){
                 echo '<a href="ログイン系/php/logout.php">ログアウト</a>';
             } else {
                 echo '<a href="ログイン系/php/login.php">ログイン</a>';

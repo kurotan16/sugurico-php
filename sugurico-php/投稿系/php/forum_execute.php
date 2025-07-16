@@ -3,11 +3,11 @@ session_start();
 
 // --- 必要なファイルを読み込む ---
 require_once '../../base/getPDO.php';
-// ★Supabaseに画像をアップロードするためのクラス（後で作成）
+
 require_once 'ImageUploader.php'; 
 
 // --- ログインチェック ---
-if (!isset($_SESSION['account']['user_id'])) {
+if (!isset($_SESSION["user_id"])) {
     // エラーメッセージを設定してフォームに戻す
     $_SESSION['post_errors'] = ['general' => '投稿するにはログインが必要です。'];
     header('Location: forum_input.php');
@@ -57,7 +57,7 @@ try {
     }
 
     $stmt->execute([
-        $_SESSION['account']['user_id'],
+        $_SESSION["user_id"],
         $title,
         $text,
         $delete_date
@@ -68,7 +68,8 @@ try {
 
     // --- 2. タグ処理 ---
     if (!empty($tags)) {
-        foreach ($tags as $tagName) {
+        $unique_tags = array_unique(array_filter(array_map('trim', $tags)));
+        foreach ($unique_tags as $tagName) {
             $tagName = trim($tagName);
             if (empty($tagName)) continue;
 

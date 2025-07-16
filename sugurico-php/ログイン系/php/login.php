@@ -1,6 +1,6 @@
 <!--  -->
 <?php session_start();
-if(isset($_SESSION['account'])){
+if(isset($_SESSION["user_id"])){
     header('Location: ../../main.php');
 }
 ?>
