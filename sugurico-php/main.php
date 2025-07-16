@@ -15,7 +15,7 @@ $pdo = getPDO();
             <?php
             if(isset($_SESSION["user_id"])){
                 echo '<a href="ログイン系/php/logout.php">ログアウト</a>';
-                echo '<a href="ログイン系/php/update.php">登録情報変更</a>';
+                echo '<a href="ログイン系/php/mypage.php">マイページ</a>';
             } else {
                echo '<a href="ログイン系/php/login.php">ログイン</a>';
             }
