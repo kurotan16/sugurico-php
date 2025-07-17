@@ -62,11 +62,13 @@ $offset = ($current_page - 1) * $posts_per_page;
 
         if ($stmt_posts->rowCount() > 0) {
             foreach ($stmt_posts as $row) {
-                // PHPの変数を埋め込む形でのHTML出力
-                echo '<article style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">';
-                echo '<h3>' . htmlspecialchars($row['title']) . '</h3>';
-                echo '<p>' . nl2br(htmlspecialchars($row['text'])) . '</p>';
-                echo '</article>';
+                 echo '<a href="../../投稿系/php/forum_yours.php?id=' . htmlspecialchars($row['forum_id']) . '" style="text-decoration:none; color:inherit;">';?>
+                <article style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                <h3><?php echo htmlspecialchars($row['title'])?></h3>
+                <p><?php echo nl2br(htmlspecialchars($row['text']))?></p>
+                </article>
+                <?php
+                echo '</a>';
             }
         } else {
             echo "<p>まだ投稿がありません。</p>";

@@ -30,7 +30,7 @@ $pdo = getPDO();
     <?php 
     if (isset($_SESSION["user_id"])){
         echo"<hr>あなたの投稿<!-- 最新三件 -->";
-        $stmt_my =  $pdo->prepare("SELECT users.user_name, forums.title, forums.text, forums.delete_date 
+        $stmt_my =  $pdo->prepare("SELECT users.user_name, forums.title, forums.text, forums.delete_date,forums.forum_id
         FROM `forums`
         JOIN users ON users.user_id = forums.user_id
         WHERE users.user_id = ? AND (forums.delete_date IS NULL OR forums.delete_date > NOW())
@@ -40,6 +40,7 @@ $pdo = getPDO();
         if ($stmt_my-> rowCount() > 0) {
             foreach ($stmt_my as $row) {
                 ?>
+                <a href="投稿系/php/forum_yours.php?id=<?php echo $row['forum_id']?>">
                 <article style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
                     <h3>
                         <?php echo htmlspecialchars($row['title'])?>
@@ -62,7 +63,7 @@ $pdo = getPDO();
                         echo '<small style="color:gray;">閲覧可能期間: 無期限</small>';
                     }
                     ?>
-                </article>
+                </article></a>
                 <?php
             }
         } else {
@@ -75,7 +76,7 @@ $pdo = getPDO();
     <!-- 最新三件 -->
     <?php 
     if(isset($_SESSION["user_id"])){
-        $stmt_all =  $pdo->prepare("SELECT users.user_name, forums.title, forums.text, forums.delete_date 
+        $stmt_all =  $pdo->prepare("SELECT users.user_name, forums.title, forums.text, forums.delete_date ,forums.forum_id
         FROM `forums`
         JOIN users ON users.user_id = forums.user_id
         Where users.user_id != ? AND(forums.delete_date IS NULL OR forums.delete_date > NOW())
@@ -83,7 +84,7 @@ $pdo = getPDO();
         LIMIT 3");
         $stmt_all -> execute([$_SESSION["user_id"]]);
     } else {
-        $stmt_all =  $pdo->prepare("SELECT users.user_name, forums.title, forums.text, forums.delete_date 
+        $stmt_all =  $pdo->prepare("SELECT users.user_name, forums.title, forums.text, forums.delete_date ,forums.forum_id
         FROM `forums`
         JOIN users 
         ON users.user_id = forums.user_id
@@ -94,11 +95,12 @@ $pdo = getPDO();
         if ($stmt_all-> rowCount() > 0) {
             foreach ($stmt_all as $row) {
                 ?>
-                <article style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-                    <h3>
-                        <?php echo htmlspecialchars($row['title'])?>
-                    </h3>
-                    <p>
+                <a href="投稿系/php/forum_others.php?id=<?php echo $row['forum_id']?>">
+                    <article style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
+                        <h3>
+                            <?php echo htmlspecialchars($row['title'])?>
+                        </h3>
+                        <p>
                         <?php echo nl2br(htmlspecialchars($row['text']))?>
                     </p>
                     <small>
@@ -117,7 +119,7 @@ $pdo = getPDO();
                         echo '<small style="color:gray;">閲覧可能期間: 無期限</small>';
                     }
                     ?>
-                </article>
+                </article></a>
                 <?php
             }
         } else {
