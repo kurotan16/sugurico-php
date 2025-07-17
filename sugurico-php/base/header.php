@@ -22,4 +22,10 @@ $current_user_name = $_SESSION['user_name'] ?? 'ゲスト';
             ?>
             
     </nav>
+    <div class="search-form-container">
+        <form action="/php/sugurico-php/search.php" method="get">
+            <input type="text" name="keyword" placeholder="キーワードで検索...">
+            <button type="submit">検索</button>
+        </form>
+    </div>
 </header>
