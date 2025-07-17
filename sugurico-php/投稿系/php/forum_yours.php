@@ -26,6 +26,15 @@ if(!$post || $post['user_id'] != $_SESSION['user_id']){
     exit;
 }
 
+    // --- タグを取得 ---
+    $stmt_tags = $pdo->prepare(
+        "SELECT * FROM `tag_dic` 
+JOIN tag on tag_dic.tag_id = tag.tag_id
+JOIN forums ON tag.forum_id = forums.forum_id
+         WHERE forums.forum_id = ? ORDER BY tag.tag_id DESC"
+    );
+    $stmt_tags->execute([$forum_id]);
+    $tags = $stmt_tags->fetchAll(PDO::FETCH_ASSOC);
 
 $stmt_comments = $pdo->prepare("SELECT c.*, u.user_name
 FROM comments c
@@ -60,6 +69,15 @@ $stmt_comments -> execute([$forum_id]);
                 <div class = "post-content">
                     <?php echo htmlspecialchars($post["text"]) ?>
                 </div>
+                <br>
+                    <?php 
+                    if (count($tags) > 0) {
+                        foreach ($tags as $tag) {
+                            echo '<a href="">',$tag['tag_name'],'</a>/';
+                        }
+                    }
+                    
+                    ?>
             </article>
             <hr>
             <section class = "comment-section">

@@ -36,6 +36,16 @@ if (!$forum_id || !is_numeric($forum_id)) {
         exit;
     }
 
+    // --- タグを取得 ---
+    $stmt_tags = $pdo->prepare(
+        "SELECT * FROM `tag_dic` 
+JOIN tag on tag_dic.tag_id = tag.tag_id
+JOIN forums ON tag.forum_id = forums.forum_id
+         WHERE forums.forum_id = ? ORDER BY tag.tag_id DESC"
+    );
+    $stmt_tags->execute([$forum_id]);
+    $tags = $stmt_tags->fetchAll(PDO::FETCH_ASSOC);
+
     // --- コメント一覧を取得 ---
     $stmt_comments = $pdo->prepare(
         "SELECT c.*, u.user_name FROM comments c
@@ -71,6 +81,25 @@ if (!$forum_id || !is_numeric($forum_id)) {
             <div class="post-content">
                 <?php echo nl2br(htmlspecialchars($post["text"])); ?>
             </div>
+            <br>
+                    <?php 
+                    if ($post['delete_date']) {
+                        $now = new DateTime();
+                        $delete_date = new DateTime($post['delete_date']);
+                        if ($now < $delete_date) {
+                            $interval = $now->diff($delete_date);
+                            echo '<small style="color:gray;">閲覧可能期間: 残り ' . $interval->format('%d日 %h時間 %i分') . '</small>';
+                        }
+                    } else {
+                        echo '<small style="color:gray;">閲覧可能期間: 無期限</small>';
+                    }
+                    if (count($tags) > 0) {
+                        foreach ($tags as $tag) {
+                            echo '<a href="">',$tag['tag_name'],'</a>/';
+                        }
+                    }
+                    
+                    ?>
             <!-- (ここに画像やタグ、残り時間などを表示) -->
         </article>
 

@@ -17,15 +17,7 @@ if(!isset($_SESSION["user_id"])){
     </head>
     <body>
         <header>
-            <nav>
-            <?php
-            if(isset($_SESSION["user_id"])){
-                echo '<a href="logout.php">ログアウト</a>';
-            } else {
-                echo '<a href="login.php">ログイン</a>';
-            }
-            ?>
-        </nav>
+            <a href="mypage.php">マイページに戻る</a>
     </header>
     <pre>
         <?php print_r($_SESSION); ?>
