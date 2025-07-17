@@ -55,10 +55,7 @@ $stmt_comments -> execute([$forum_id]);
         </title>
     </head>
     <body>
-        <header>
-            <a href="../../main.php">トップに戻る</a>
-            <a href="mypage.php">マイページに戻る</a>
-        </header>
+        <?php require_once '../../base/header.php'; ?>
         <pre>
             <?php print_r($_SESSION)?>
         </pre>
@@ -118,9 +115,7 @@ $stmt_comments -> execute([$forum_id]);
                 </div>
             </section>
         </main>
-    <footer>
-
-    </footer>
+<?php require_once '../../base/footer.php'; ?>
     </body>
     <script src="../js/.js"></script>
 </html>

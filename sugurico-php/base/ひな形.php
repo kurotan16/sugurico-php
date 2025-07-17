@@ -15,23 +15,11 @@ if(!isset($_SESSION["user_id"])){
 
     </head>
     <body>
-        <header>
-            <nav>
-            <?php
-            if(isset($_SESSION["user_id"])){
-                echo '<a href="ログイン系/php/logout.php">ログアウト</a>';
-            } else {
-                echo '<a href="ログイン系/php/login.php">ログイン</a>';
-            }
-            ?>
-        </nav>
-    </header>
+        <?php require_once '../../base/header.php'; ?>
     <pre>
         <?php print_r($_SESSION)?>
     </pre>
-    <footer>
-
-    </footer>
+<?php require_once '../../base/footer.php'; ?>
     </body>
     <script src="../js/.js"></script>
 </html>

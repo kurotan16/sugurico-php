@@ -65,14 +65,7 @@ JOIN forums ON tag.forum_id = forums.forum_id
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <header>
-        <a href="../../main.php">トップに戻る</a>
-        <?php if(isset($_SESSION['user_id'])){
-            echo '<a href="mypage.php">マイページへ</a>';
-        } else {
-            echo '<a href="login.php">ログイン</a>';
-        } ?>
-    </header>
+    <?php require_once '../../base/header.php'; ?>
 
     <main>
         <article class="post-detail">
@@ -140,5 +133,7 @@ JOIN forums ON tag.forum_id = forums.forum_id
                     </div>
         </section>
     </main>
+<?php require_once '../../base/footer.php'; ?>
+
 </body>
 </html>

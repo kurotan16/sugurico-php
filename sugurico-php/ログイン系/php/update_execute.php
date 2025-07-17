@@ -42,6 +42,7 @@ $stmt = $pdo -> prepare("UPDATE `users`
 SET `name` = ?, `user_name` = ?, `login_id` = ?, `email` = ?, `password` = ?
 WHERE user_id = ?");
 $stmt -> execute([$name, $user_name, $login_id, $email, $hashed_password, $_SESSION["user_id"]]);
+$_SESSION['user_name'] = $user_name;
 unset($_SESSION['update_form']);
 $_SESSION['update_form']['message'] = "更新が完了しました。";
 header('Location: update.php');

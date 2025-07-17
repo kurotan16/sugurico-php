@@ -36,13 +36,7 @@ $offset = ($current_page - 1) * $posts_per_page;
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <header>
-        <h1>マイページ</h1>
-        <nav>
-            <a href="../../main.php">トップに戻る</a>
-            <a href="logout.php">ログアウト</a>
-        </nav>
-    </header>
+<?php require_once '../../base/header.php'; ?>
 
     <main>
         <h2><?php echo htmlspecialchars($_SESSION['user_name']); ?>さんの投稿一覧</h2>
@@ -102,6 +96,7 @@ $offset = ($current_page - 1) * $posts_per_page;
             ?>
         </nav>
 
-    </main>
+
+    </main><?php require_once '../../base/footer.php'; ?>
 </body>
 </html>

@@ -27,9 +27,7 @@ unset($_SESSION['post_errors']);
     <link rel="stylesheet" href="../css/forum_input.css"> <!-- 投稿フォーム専用CSS -->
 </head>
 <body>
-    <header>
-        <!-- (ヘッダー内容は省略) -->
-    </header>
+    <?php require_once '../../base/header.php'; ?>
 
     <main>
         <h1>新しい記録を投稿</h1>
@@ -97,9 +95,10 @@ unset($_SESSION['post_errors']);
             <input type="submit" value="投稿する">
         </form>
     </main>
-
+<?php require_once '../../base/footer.php'; ?>
+</body>
     <!-- ★JavaScriptへのリンクを修正 -->
     <script src="../js/tag_form.js"></script> 
     <script src="../js/image_preview.js"></script> <!-- 画像プレビュー用JS -->
-</body>
+
 </html>

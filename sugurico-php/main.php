@@ -10,19 +10,7 @@ $pdo = getPDO();
     <title>スグリコ - メインページ</title>
 </head>
 <body>
-    <header>
-        <nav>
-            <?php
-            if(isset($_SESSION["user_id"])){
-                echo '<a href="ログイン系/php/logout.php">ログアウト</a>';
-                echo '<a href="ログイン系/php/mypage.php">マイページ</a>';
-            } else {
-               echo '<a href="ログイン系/php/login.php">ログイン</a>';
-            }
-            
-            ?>
-        </nav>
-    </header>
+    <?php require_once 'base/header.php'; ?>
     <h1>ようこそ、スグリコへ！</h1>
     <pre>
         <?php print_r($_SESSION)?>
@@ -132,9 +120,7 @@ $pdo = getPDO();
     if(isset($_SESSION["user_id"])){
         echo '<a href="投稿系/php/forum_input.php" class = "floating-button">+</a>';
         } ?>
-    <footer>
-
-    </footer>
+    <?php require_once 'base/footer.php'; ?>
     <script src="script.js"></script>
 </body>
 </html>

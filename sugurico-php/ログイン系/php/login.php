@@ -14,10 +14,7 @@ if(isset($_SESSION["user_id"])){
 
     </head>
     <body>
-        <header>
-            <nav>
-        </nav>
-    </header>
+<?php require_once '../../base/header.php'; ?>
     <pre>
         <?php print_r($_SESSION)?>
     </pre>
@@ -34,9 +31,7 @@ if(isset($_SESSION["user_id"])){
         <input type="submit" value="ログイン">
     </form>
     <a href="signin.php"><button>新規登録</button></a>
-    <footer>
-
-    </footer>
+<?php require_once '../../base/footer.php'; ?>
     </body>
     <script src="../js/.js"></script>
 </html>

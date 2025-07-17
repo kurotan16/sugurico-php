@@ -1,4 +1,4 @@
-<!--  -->
+<!-- update.php -->
 <?php session_start();
 require_once "../../base/getPDO.php";
 if(!isset($_SESSION["user_id"])){
@@ -16,9 +16,7 @@ if(!isset($_SESSION["user_id"])){
 
     </head>
     <body>
-        <header>
-            <a href="mypage.php">マイページに戻る</a>
-    </header>
+        <?php require_once '../../base/header.php'; ?>
     <pre>
         <?php print_r($_SESSION); ?>
         <?php 
@@ -76,9 +74,7 @@ if(!isset($_SESSION["user_id"])){
         </div>
         <input type="submit" value="更新">
     </form>
-    <footer>
-
-    </footer>
+<?php require_once '../../base/footer.php'; ?>
     </body>
     <script src="../js/.js"></script>
 </html>
