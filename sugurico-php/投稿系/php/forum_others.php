@@ -1,3 +1,4 @@
+<!-- forum_others.php -->
 <?php
 session_start();
 require_once '../../base/getPDO.php'; // パスは適宜調整

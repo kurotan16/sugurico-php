@@ -1,4 +1,4 @@
-<!-- 自分の投稿を見るページ -->
+<!-- forum_yours.php -->
 <?php session_start();
 require_once '../../base/getPDO.php';
 if(!isset($_SESSION["user_id"])){
@@ -48,7 +48,7 @@ $stmt_comments -> execute([$forum_id]);
 
 <html lang="ja">
     <head>
-        <link rel="stylesheet" href="../css/.css">
+        <link rel="stylesheet" href="../css/style.css">
         <meta charset="UTF-8">
         <title>
             <?php echo htmlspecialchars($post['title'])?> | スグリコ

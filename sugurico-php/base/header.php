@@ -1,3 +1,5 @@
+
+
 <?php
 // このファイルが直接アクセスされた場合に、セッションが未開始なら開始する
 if (session_status() === PHP_SESSION_NONE) {
@@ -28,4 +30,6 @@ $current_user_name = $_SESSION['user_name'] ?? 'ゲスト';
             <button type="submit">検索</button>
         </form>
     </div>
-</header>
+</header><style>
+    
+</style>
