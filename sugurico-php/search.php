@@ -48,7 +48,8 @@ if (!empty(trim($keyword))) {
     <head>
         <meta charset="UTF-8">
         <title>検索結果 | スグリコ</title>
-        <link rel="stylesheet" href="">
+            <link rel="stylesheet" href="base/style.css">
+
     </head>
     <body>
         <?php require_once 'base/header.php'; ?>

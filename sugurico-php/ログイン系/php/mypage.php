@@ -33,7 +33,7 @@ $offset = ($current_page - 1) * $posts_per_page;
 <head>
     <meta charset="UTF-8">
     <title>マイページ | スグリコ</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../../base/style.css">
 </head>
 <body>
 <?php require_once '../../base/header.php'; ?>
