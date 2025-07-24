@@ -89,7 +89,13 @@ JOIN forums ON tag.forum_id = forums.forum_id
                     }
                     if (count($tags) > 0) {
                         foreach ($tags as $tag) {
-                            echo '<a href="">',$tag['tag_name'],'</a>/';
+                            ?>
+                            
+                            <a href="../../search.php?keyword=<?php echo htmlspecialchars($tag['tag_name'])?>&type=tag">
+                                <?php echo htmlspecialchars($tag['tag_name'])?>
+                            </a>/
+
+                            <?php
                         }
                     }
                     
