@@ -71,16 +71,16 @@ if (!empty($form_data)) {
             <div class="form-group">
                 <label for="loginIdInput">ログインID</label>
                 <input type="text" name="login_id" id="loginIdInput" value="<?php echo htmlspecialchars($display_data['login_id'] ?? ''); ?>" required>
-                <?php if (isset($errors['login_id'])): ?>
+                <?php if (isset($errors['login_id'])){ ?>
                     <p style="color:red;"><?php echo htmlspecialchars($errors['login_id']); ?></p>
-                <?php endif; ?>
+                <?php } ?>
             </div>
             <div class="form-group">
                 <label for="emailInput">メールアドレス</label>
                 <input type="email" name="email" id="emailInput" value="<?php echo htmlspecialchars($display_data['email'] ?? ''); ?>" required>
-                 <?php if (isset($errors['email'])): ?>
+                 <?php if (isset($errors['email'])){ ?>
                     <p style="color:red;"><?php echo htmlspecialchars($errors['email']); ?></p>
-                <?php endif; ?>
+                <?php } ?>
             </div>
             <hr>
             <p>パスワードを変更する場合のみ入力してください</p>

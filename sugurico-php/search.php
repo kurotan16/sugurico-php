@@ -68,7 +68,12 @@ if (!empty(trim($keyword))) {
     <?php require_once 'base/header.php'; ?>
     <main>
         <h1>「<?php echo htmlspecialchars($keyword); ?>」の検索結果 (<?php echo htmlspecialchars($type); ?>)</h1>
-        <p><?php echo $total_posts; ?>件の投稿が見つかりました。</p>
+        <?php 
+        if ($total_posts > 0) { 
+            echo "<p>",$total_posts,"件の投稿が見つかりました。</p>";
+        }
+        ?>
+        
         
         <section class="post-list">
                 <?php if(count($posts) > 0){
@@ -107,27 +112,27 @@ if (!empty(trim($keyword))) {
             </section>
 
         <nav class="pagination">
-            <?php if ($total_pages > 1): ?>
+            <?php if ($total_pages > 1){ ?>
                 <?php
                 // --- 5. ページネーションリンクにtypeパラメータを追加 ---
                 $base_link = '?keyword=' . urlencode($keyword) . '&type=' . urlencode($type);
                 ?>
-                <?php if ($current_page > 1): ?>
+                <?php if ($current_page > 1){ ?>
                     <a href="<?php echo $base_link . '&page=' . ($current_page - 1); ?>">« 前へ</a>
-                <?php endif; ?>
+                <?php } ?>
 
-                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <?php if ($i == $current_page): ?>
+                <?php for ($i = 1; $i <= $total_pages; $i++){ ?>
+                    <?php if ($i == $current_page){ ?>
                         <span><?php echo $i; ?></span>
-                    <?php else: ?>
+                    <?php }else{ ?>
                         <a href="<?php echo $base_link . '&page=' . $i; ?>"><?php echo $i; ?></a>
-                    <?php endif; ?>
-                <?php endfor; ?>
+                    <?php } ?>
+                <?php } ?>
 
-                <?php if ($current_page < $total_pages): ?>
+                <?php if ($current_page < $total_pages){ ?>
                     <a href="<?php echo $base_link . '&page=' . ($current_page + 1); ?>">次へ »</a>
-                <?php endif; ?>
-            <?php endif; ?>
+                <?php } ?>
+            <?php } ?>
         </nav>
     </main>
     <?php require_once 'base/footer.php'; ?>
