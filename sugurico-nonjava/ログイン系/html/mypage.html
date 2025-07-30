@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+       <meta charset="UTF-8">
+    <title>マイページ | スグリコ</title>
+    <link rel="stylesheet" href="../css/mypage.css"> 
+    </head>
+    <body>
+        <!-- 共通ヘッダー -->
+        <header id="header-container"></header>
+        <main>
+            <!-- JSでここに「〇〇さんの投稿一覧」と表示 -->
+            <h2 id="mypage-title">
+                あなたの投稿一覧
+            </h2>
+            <p>
+                <a href="update.html">登録情報を変更する</a>
+            </p>
+            <hr>
+            <!-- 投稿一覧を表示するエリア -->
+            <div id="my-posts-list" class="post-list">
+                <!-- JSでここに投稿が挿入される -->
+                <p>読み込み中...</p>
+            </div>
+            <!-- ページネーションのリンクを表示するエリア -->
+             <nav id="pagination-container" class="pagination"></nav>
+        </main>
+        <!-- 共通フッター -->
+        <footer id="footer-container"></footer>
+        <!-- JSライブラリと、このページ専用のJS -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../../base/header.js"></script> 
+    <script src="../js/mypage.js"></script>
+    </body>
+    
+</html>

@@ -1,3 +1,4 @@
+<!-- mypage.php -->
 <?php 
 session_start();
 require_once '../../base/getPDO.php';
