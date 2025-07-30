@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="../css/style.css">
+        <link rel="stylesheet" href="../css/forum_input.css">
+    </head>
+    <body>
+        <!-- 共通ヘッダー -->
+        <header id="header-container"></header>
+        <main class="form-container">
+            <h1>新しい記録を投稿</h1>
+            <div id="message-area" class="message" style="display: none;"></div>
+
+            <form id="post-form">
+                <!-- タイトル -->
+                <div class="form-group">
+                    <label for="titleInput">タイトル</label>
+                    <input type="text" id="titleInput" required>
+                </div>
+                <!-- 本文 -->
+                <div class="form-group">
+                    <label for="textInput"></label>
+                    <textarea id="textInput" rows="10"></textarea>
+                </div>
+                <!-- 公開期限 -->
+                <div class="form-group">
+                    <label for="expireSelect">公開期限</label>
+                    <select id="expireSelect">
+                        <option value="1day">1日後</option>
+                        <option value="2days">2日後</option>
+                        <option value="3days">3日後</option>
+                        <option value="4days">4日後</option>
+                        <option value="5days">5日後</option>
+                        <option value="6days">6日後</option>
+                        <option value="7days">7日後</option>
+                        <option value="permanent" selected>無期限</option>
+                    </select>
+                    <!-- プレミアム機能は後でJSで表示制御 -->
+                </div>
+                <!-- 画像添付 -->
+                <div class="form-group">
+                    <label for="imagesInput">画像 (最大3枚まで)</label>
+                    <input type="file" id="imagesInput" multiple accept="image/*">
+                    <div id="image-preview-container"></div>
+                </div>
+                <!-- タグ -->
+                <div class="form-group">
+                    <label>タグ (最大10個まで)</label>
+                    <div id="tag-container">
+                        <div class="tag-input-wrapper">
+                            <input type="text" class="tag-input" placeholder="タグを入力">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" id="submitButton" class="submit-button">投稿する</button>
+            </form>
+        </main>
+        <!-- 共通フッター -->
+        <footer id="footer-container"></footer>
+        <!-- JSライブラリと、このページ専用のJS -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="../../base/header.js" defer></script>
+        <script src="../js/image_preview.js" defer></script>
+        <script src="../js/tag_form.js" defer></script>
+        <script src="../js/post_form.js" defer></script>
+    </body>
+</html>
