@@ -80,11 +80,9 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
                     }
                 }
                 
-                // 自分の投稿か他人のかでリンク先を切り替え
-                const detailPage = (userId && userId === post.user_id_auth) ? 'forum_yours.html' : 'forum_others.html';
 
                 return `
-                    <a href="投稿系/php/${detailPage}?id=${post.forum_id}">
+                    <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}">
                         <article class="post-item">
                             <h3>${escapeHTML(post.title)}</h3>
                             <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>

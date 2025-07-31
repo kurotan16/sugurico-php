@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- 5. 取得した投稿をHTMLに描画 ---
     if(posts.length > 0){
         postListContainer.innerHTML = posts.map(post =>`
-            <a href="forum_yours.html?id=${post.forum_id}">
+            <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}">
                 <article class="post-item">
                     <h3>${escapeHTML(post.title)}</h3>
                     <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
