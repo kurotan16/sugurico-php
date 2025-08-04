@@ -86,7 +86,6 @@ main{
 
 .comment-section h2 {
     font-size: 1.5em;
-    margin-bottom: 20em;
 }
 
 /* コメント投稿フォーム */
@@ -116,7 +115,8 @@ main{
 
 /* コメント一覧 */
 .comment-list{
-    margin-top: 20px;
+    overflow-y: scroll;
+    max-height: 400px;
 }
 
 .comment-item {

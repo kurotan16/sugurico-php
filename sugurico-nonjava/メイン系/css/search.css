@@ -1,0 +1,8 @@
+/* --- 検索結果の見出し --- */
+#search-title {
+    font-size: 1.8em;
+    margin-bottom: 0.5em;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 0.5em;
+    word-break: break-all;
+}
