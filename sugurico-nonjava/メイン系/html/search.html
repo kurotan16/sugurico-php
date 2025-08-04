@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <title>検索結果 | スグリコ</title>
+        <link rel="stylesheet" href="../css/main.css">
+        <link rel="stylesheet" href="../css/search.css">
+    </head>
+    <body>
+        <!-- 共通ヘッダー -->
+        <header id="header-container">
+
+        </header>
+        <main>
+            <!-- JSでここに「〇〇の検索結果」と表示 -->
+            <h1 id="search-title">検索結果</h1>
+            <p id="search-count"></p>
+
+            <!-- 投稿一覧を表示するエリア -->
+            <section id="posts-list-container" class="post-list">
+                <p>検索中...</p>
+            </section>
+
+            <!-- ページネーションのリンクを表示するエリア -->
+            <nav id="pagination-container" class="pagination"></nav>
+        </main>
+        
+        <!-- 共通フッター -->
+        <footer id="footer-container"></footer>
+
+        <!-- JSライブラリと、このページ専用のJS -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <script src="../../base/header.js"></script>
+        <script src="../js/search.js"></script>
+    </body>
+</html>

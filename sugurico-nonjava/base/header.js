@@ -15,6 +15,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
  */
 async function setupHeader() {
     const headerContainer = document.getElementById('header-container');
+    const footerContainer = document.getElementById('footer-container');
     if (!headerContainer) return;
 
     // --- ログイン状態を取得 ---
@@ -44,8 +45,24 @@ async function setupHeader() {
         `;
     }
 
+    headerHTML += `
+    <div class="search-form-container">
+        <form action="../../メイン系/html/search.html" method="get">
+            <input type="text" name="keyword" placeholder="キーワードで検索...">
+            <select name="type" id="content">
+                <option value="title">タイトル</option>
+                <option value="text">テキスト</option>
+                <option value="tag">タグ</option>
+            </select>
+            <button type="submit">検索</button>
+        </form>
+    </div>
+    `;
+
     // 生成したHTMLをヘッダーコンテナに挿入
     headerContainer.innerHTML = headerHTML;
+
+    footerContainer.innerHTML = `<p>© 2025 スグリコ. All Rights Reserved.</p>`;
 
     // もしログアウトボタンが存在すれば、イベントリスナーを設定
     const logoutButton = document.getElementById('logout-button');

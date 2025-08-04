@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () =>{
             }
         }
         // タグのHTMLを生成
-        const tagsHTML = tags.map(tag =>`<a href="../../search.html?keyword=${encodeURIComponent(tag.tag_dic.tag_name)}&type=tag" class="tag-link">#${escapeHTML(tag.tag_dic.tag_name)}</a>`).join(' ');
+        const tagsHTML = tags.map(tag =>`<a href="../../メイン系/html/search.html?keyword=${encodeURIComponent(tag.tag_dic.tag_name)}&type=tag" class="tag-link">#${escapeHTML(tag.tag_dic.tag_name)}</a>`).join(' ');
 
         // 画像のHTMLを生成
         const imagesHTML = images.map(image =>
