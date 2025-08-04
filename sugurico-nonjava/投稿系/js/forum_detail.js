@@ -1,3 +1,4 @@
+// forum_detail.js
 'use strict';
 
 document.addEventListener('DOMContentLoaded', async () =>{

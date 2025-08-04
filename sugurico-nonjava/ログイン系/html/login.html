@@ -1,50 +1,47 @@
 <!-- login.html -->
 <!DOCTYPE html>
 <html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>ログイン | スグリコ</title>
-    <!-- CSSのパスは実際の構成に合わせてください -->
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../css/login.css">
-</head>
-<body>
-    <!-- ヘッダー部分は、共通のHTMLを読み込むか、静的に記述します -->
-    <header id="header-container"></header>
-
-    <main class="form-container">
-        <h1>ログイン</h1>
+    <head>
+        <meta charset="UTF-8">
+        <title>ログイン | スグリコ</title>
+        <link rel="stylesheet" href="../css/style.css">
+        <link rel="stylesheet" href="../css/login.css">
+    </head>
+    <body>
+        <header id="header-container"></header>
+        <main class="form-container">
+            <h1>ログイン</h1>
         
-        <!-- エラー/成功メッセージを表示するための領域 -->
-        <div id="message-area" style="display: none;"></div>
-
-        <!-- フォームにはidを付け、actionは不要 -->
-        <form id="login-form">
-            <div class="form-group">
-                <label for="emailInput">メールアドレス</label>
-                <!-- ★Supabaseはメールアドレスでログインするのが基本 -->
-                <input type="email" name="email" id="emailInput" required>
+            <!-- エラー/成功メッセージを表示するための領域 -->
+             
+            <div id="message-area" style="display: none;"></div>
+            
+            <!-- フォームにはidを付け、actionは不要 -->
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="emailInput">メールアドレス</label>
+                    
+                    <!-- ★Supabaseはメールアドレスでログインするのが基本 -->
+                    <input type="email" name="email" id="emailInput" required>
+                </div>
+                <div class="form-group">
+                    <label for="passwordInput">パスワード</label>
+                    <input type="password" name="password" id="passwordInput" required>
+                </div>
+                <button type="submit" id="loginButton" class="form-button">ログイン</button>
+            </form>
+            <div class="form-footer">
+                <a href="signin.html">新規登録はこちら</a>
             </div>
-            <div class="form-group">
-                <label for="passwordInput">パスワード</label>
-                <input type="password" name="password" id="passwordInput" required>
-            </div>
-            <button type="submit" id="loginButton" class="form-button">ログイン</button>
-        </form>
-
-        <div class="form-footer">
-            <a href="signin.html">新規登録はこちら</a>
-        </div>
-    </main>
-    <!-- ▼▼▼ ここを追記 ▼▼▼ -->
-    <!-- 1. Supabaseの公式ライブラリを読み込む -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- 3. 作成した../js/login.jsを "defer" 付きで読み込む -->
-    <script src="../../base/header.js"></script>
-    <script src="../js/login.js" defer></script>
-    
-    <!-- 共通フッター -->
+        </main>
+        <!-- ▼▼▼ ここを追記 ▼▼▼ -->
+        <!-- 1. Supabaseの公式ライブラリを読み込む -->
+        <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        <!-- 3. 作成した../js/login.jsを "defer" 付きで読み込む -->
+        <script src="../../base/header.js"></script>
+        <script src="../js/login.js" defer></script>
+        
+        <!-- 共通フッター -->
         <footer id="footer-container"></footer>
-
-</body>
+    </body>
 </html>

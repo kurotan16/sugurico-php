@@ -1,3 +1,4 @@
+// post_forum.js
 'use strict';
 
 document.addEventListener('DOMContentLoaded', async () =>{

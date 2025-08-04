@@ -1,3 +1,4 @@
+//mypage.js
 'use strict';
 
 document.addEventListener('DOMContentLoaded', async () => {

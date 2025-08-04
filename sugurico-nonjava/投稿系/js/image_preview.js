@@ -1,3 +1,4 @@
+// image_preview.js
 'use strict';
 
 document.addEventListener('DOMContentLoaded', () => {
