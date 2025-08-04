@@ -34,11 +34,11 @@ document.addEventListener('DOMContentLoaded', async () =>{
             supabaseClient.from('tag').select('tag_dic(tag_name)').eq('forum_id',forumId),
             supabaseClient.from('forum_images').select('image_url').eq('post_id',forumId).order('display_order'),
             supabaseClient.from('comments').select(`
-        comment_id,
-        comment_text,
-        created_at,
-        users ( user_name )
-    `).eq('forum_id',forumId).order('created_at',{ascending: false})
+                comment_id,
+                comment_text,
+                created_at,
+                users (user_name)
+                `).eq('forum_id',forumId).order('created_at',{ascending: false})
         ]);
         if (postResponse.error || !postResponse.data) throw new Error('投稿が見つからないか、取得に失敗しました。');
         
@@ -83,9 +83,15 @@ document.addEventListener('DOMContentLoaded', async () =>{
         let remainingTimeHTML = '<small class="post-meta">閲覧可能期間: 無期限</small>';
         if(post.delete_date) {
             const deleteDate = new Date(post.delete_date);
+
             if (new Date() < deleteDate) {
                 // (簡易的な残り時間表示)
-                remainingTimeHTML = `<small class="post-meta">閲覧期限: ${deleteDate.toLocaleString()}</small>`;
+                // ▼▼▼ この部分を修正 ▼▼▼
+                const formattedDeleteDate = deleteDate.toLocaleString('ja-JP', {
+                    timeZone: 'Asia/Tokyo',
+                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
+                });
+                remainingTimeHTML = `<small class="post-meta">閲覧期限: ${formattedDeleteDate}</small>`;
             }
         }
         // タグのHTMLを生成
@@ -178,15 +184,31 @@ document.addEventListener('DOMContentLoaded', async () =>{
      */
 
     function renderComments(comments) {
+        console.log(comments);
         if(comments && comments.length > 0){
+            
             commentListContainer.innerHTML = comments.map(
-                comment =>`
-                <div class="comment-item">
-                    <strong>${escapeHTML(comment.users.user_name)}:</strong>
-                    <p>${nl2br(escapeHTML(comment.comment_text))}</p>
-                    <small>${new Date(comment.created_at).toLocaleString()}</small>
-                </div>
-            `
+                comment => {
+                    // ▼▼▼ この部分を修正 ▼▼▼
+                    // タイムゾーンを'Asia/Tokyo'に指定し、表示形式も整える
+                    const commentDate = new Date(comment.created_at).toLocaleString('ja-JP', {
+                        timeZone: 'Asia/Tokyo',
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    // ▲▲▲ 修正ここまで ▲▲▲
+                    
+                    return `
+                        <div class="comment-item">
+                            <strong>${escapeHTML(comment.users?.user_name || '不明')}:</strong>
+                            <p>${nl2br(comment.comment_text)}</p>
+                            <small>${commentDate}</small>
+                        </div>
+                    `;
+                }
             ).join('');
         } else {
             commentListContainer.innerHTML = "<p>まだコメントはありません。</p>"
