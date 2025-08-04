@@ -109,8 +109,8 @@ document.addEventListener('DOMContentLoaded', async () =>{
      * コメントフォームを描画し、イベントを設定する
      */
 
-    function renderCommentForm(isOwner) {
-        const returnPage = isOwner ? 'yours': 'others'; // 戻り先ページの判断は不要に
+    function renderCommentForm() {
+
         commentFormContainer.innerHTML = `
             <form id="comment-form">
                 <textarea name="comment_text" placeholder="コメントを入力..." required></textarea>
@@ -123,11 +123,11 @@ document.addEventListener('DOMContentLoaded', async () =>{
     }
 
     /**
-     * コメント投稿処理
+     * コメント投稿処理             
      */
 
     async function handleCommentSubmit(event) {
-        event.preventDefalt();
+        event.preventDefault();
         const commentText = event.target.querySelector('textarea').value.trim();
         if(!commentText) return;
 
