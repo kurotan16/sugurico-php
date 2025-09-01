@@ -100,3 +100,26 @@ header nav  a {
     background-color: #0056b3;
     transform: scale(1.1);
 }
+
+/* --- index.html の投稿リストを横並びにするスタイル --- */
+/* 親コンテナをFlexboxに設定 */
+.posts-container {
+    display: flex;
+    gap: 30px; /* 左右のカラム間の隙間 */
+    align-items: flex-start; /* コンテンツの高さが違っても上端を揃える */
+}
+
+/* 各カラムのスタイル */
+.posts-column {
+    flex: 1; /* コンテナ内で利用可能なスペースを均等に分け合う */
+    min-width: 0; /* 横幅が縮小できるようにするためのおまじない */
+}
+
+/* --- レスポンシブ対応 (スマートフォンなど) --- */
+/* 画面幅が768px以下になったら、横並びを解除して縦並びにします */
+@media (max-width: 768px) {
+    .posts-container {
+        flex-direction: column; /* 縦積みに変更 */
+        gap: 20px;
+    }
+}

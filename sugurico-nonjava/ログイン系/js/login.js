@@ -46,7 +46,7 @@ if (loginForm) {
             // ログイン成功
             alert('ログインに成功しました！');
             // メインページに移動
-            window.location.href = '../../メイン系/html/main.html'; // パスは適宜調整してください
+            window.location.href = '../../メイン系/html/index.html'; // パスは適宜調整してください
         }
         
         // ボタンの状態を元に戻す
