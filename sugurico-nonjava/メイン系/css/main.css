@@ -103,11 +103,11 @@ header nav  a {
 
 /* --- index.html の投稿リストを横並びにするスタイル --- */
 /* 親コンテナをFlexboxに設定 */
-/* .posts-container {
-    /* display: flex; */
-    /* gap: 30px; 左右のカラム間の隙間 */
-    /* align-items: flex-start; コンテンツの高さが違っても上端を揃える */
-/* } */
+.posts-container {
+    display: flex;
+    gap: 30px; /* 左右のカラム間の隙間 */
+    align-items: flex-start; /* コンテンツの高さが違っても上端を揃える */
+}
 
 /* 各カラムのスタイル */
 .posts-column {
