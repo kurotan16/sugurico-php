@@ -28,7 +28,7 @@ async function setupHeader() {
         const userName = session.user.user_metadata.user_name|| 'ユーザー';
         console.log(userName);
         headerHTML = `
-            <h1><a href="../../メイン系/html/main.html">スグリコ</a></h1>
+            <h1><a href="../../メイン系/html/index.html">スグリコ</a></h1>
             <nav>
                 <a href="../../ログイン系/html/mypage.html">${escapeHTML(userName)}さん</a>
                 <a href="#" id="logout-button">ログアウト</a>
@@ -37,7 +37,7 @@ async function setupHeader() {
     } else {
         // 【ログインしていない場合のヘッダー】
         headerHTML = `
-            <h1><a href="../../メイン系/html/main.html">スグリコ</a></h1>
+            <h1><a href="../../メイン系/html/index.html">スグリコ</a></h1>
             <nav>
                 <a href="../../ログイン系/html/login.html">ログイン</a>
                 <a href="../../ログイン系/html/signin.html">新規登録</a>
@@ -74,7 +74,7 @@ async function setupHeader() {
                 console.error('Logout Error:', error);
             } else {
                 // ログアウト成功後、ログインページに移動
-                window.location.href = '../../メイン系/html/main.html';
+                window.location.href = '../../メイン系/html/index.html';
             }
         });
     }
