@@ -212,7 +212,7 @@
     box-sizing: border-box;
 }
 
-.insert-tags, .delete-tags {
+.insert-button, .delete-button {
     padding: 12px;
     color: white;
     border: none;
@@ -223,12 +223,12 @@
     transition: background-color 0.2s;
 }
 
-.insert-tags {
+.insert-button {
     background-color: #00a2ff; /* 投稿ボタンは緑色に */
     color: white;
 }
 
-.delete-tags {
+.delete-button {
     background-color: #ff0000; /* 投稿ボタンは緑色に */
     color: white;
 }
