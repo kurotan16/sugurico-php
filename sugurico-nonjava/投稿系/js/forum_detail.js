@@ -80,20 +80,8 @@ document.addEventListener('DOMContentLoaded', async () =>{
 
     function renderPost(post, tags, images) {
         // 残り時間の計算
-        let remainingTimeHTML = '<small class="post-meta">閲覧可能期間: 無期限</small>';
-        if(post.delete_date) {
-            const deleteDate = new Date(post.delete_date);
+        let remainingTimeHTML = timeLeft(post.delete_date);
 
-            if (new Date() < deleteDate) {
-                // (簡易的な残り時間表示)
-                // ▼▼▼ この部分を修正 ▼▼▼
-                const formattedDeleteDate = deleteDate.toLocaleString('ja-JP', {
-                    timeZone: 'Asia/Tokyo',
-                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-                });
-                remainingTimeHTML = `<small class="post-meta">閲覧期限: ${formattedDeleteDate}</small>`;
-            }
-        }
         // タグのHTMLを生成
         const tagsHTML = tags.map(tag =>`<a href="../../メイン系/html/search.html?keyword=${encodeURIComponent(tag.tag_dic.tag_name)}&type=tag" class="tag-link">#${escapeHTML(tag.tag_dic.tag_name)}</a>`).join(' ');
 
@@ -108,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () =>{
             <div class="post-images-container">${imagesHTML}</div>
             <div class="post-content">${nl2br(escapeHTML(post.text))}</div>
             <div class="post-tags">${tagsHTML}</div>
-            ${remainingTimeHTML}
+            <small class="post-meta">${remainingTimeHTML}</small>
         `; 
     }
 
@@ -163,11 +151,11 @@ document.addEventListener('DOMContentLoaded', async () =>{
         } = await supabaseClient
                     .from('comments')
                     .select(`
-        comment_id,
-        comment_text,
-        created_at,
-        users ( user_name )
-    `)
+                        comment_id,
+                        comment_text,
+                        created_at,
+                        users ( user_name )
+                        `)
                     .eq('forum_id', forumId)
                     .order('created_at', {ascending:false});
 
@@ -189,23 +177,13 @@ document.addEventListener('DOMContentLoaded', async () =>{
             
             commentListContainer.innerHTML = comments.map(
                 comment => {
-                    // ▼▼▼ この部分を修正 ▼▼▼
-                    // タイムゾーンを'Asia/Tokyo'に指定し、表示形式も整える
-                    const commentDate = new Date(comment.created_at).toLocaleString('ja-JP', {
-                        timeZone: 'Asia/Tokyo',
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    // ▲▲▲ 修正ここまで ▲▲▲
+                    const commentTimeAgo = timeAgo(comment.created_at);
                     
                     return `
                         <div class="comment-item">
                             <strong>${escapeHTML(comment.users?.user_name || '不明')}:</strong>
                             <p>${nl2br(comment.comment_text)}</p>
-                            <small>${commentDate}</small>
+                            <small>${commentTimeAgo}</small>
                         </div>
                     `;
                 }
@@ -214,6 +192,76 @@ document.addEventListener('DOMContentLoaded', async () =>{
             commentListContainer.innerHTML = "<p>まだコメントはありません。</p>"
         }
     }
+    
+    /**
+     * UTCの日時文字列を、日本の現在時刻からの相対時間文字列に変換する
+     * 例: "3分前", "5時間前", "2日前"
+     * @param {string} utcDateString - Supabaseから取得したUTCの日時文字列
+     * @returns {string} - 相対時間文字列
+     */
+    
+    function timeAgo(utcDateString) {
+    if (!utcDateString) return '';
+
+    // Supabaseから受け取ったUTC時刻をDateオブジェクトに変換
+    const postDate = new Date(utcDateString);
+    // 現在の日本時刻を取得
+    const now = new Date;
+
+    // 差分を秒で計算
+    const diffInSeconds = Math.floor((now - postDate) / 1000);
+
+    // 差分に応じて表示を切り替え
+    const minutes = Math.floor(diffInSeconds / 60);
+    if(minutes < 1) {
+        return "たった今";
+    }
+    if (minutes < 60) {
+        return `${minutes}分前`
+    }
+
+    const hours = Math.floor(minutes / 60);
+    if(hours < 24) {
+        return `${hours}時間前`;
+    }
+
+    const days = Math.floor(hours / 24);
+    if (days < 30) {
+        return `${days}日前`;
+    }
+
+    const months = Math.floor(days / 30);
+    if (months < 12) {
+        return `${months}ヶ月前`
+    }
+
+    const years = Math.floor(months / 12);
+    return `${years}年前`;
+}
+    /**
+     * 期限までの残り時間を計算して文字列を返す
+     */
+    function timeLeft(utcDateString) {
+        if (!utcDateString) return '閲覧可能期間: 無期限';
+        const deadline = new Date(utcDateString);
+        const now = new Date();
+        if (deadline <= now) return ''; 
+        
+        let diffInMs = deadline - now;
+        const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+        diffInMs -= days * (1000 * 60 * 60 * 24);
+        const hours = Math.floor(diffInMs / (1000 * 60 * 60));
+        diffInMs -= hours * (1000 * 60 * 60);
+        const minutes = Math.floor(diffInMs / (1000 * 60));
+        
+        let result = '期限: あと ';
+        if (days > 0) result += `${days}日 `;
+        if (hours > 0) result += `${hours}時間 `;
+        if (minutes > 0) result += `${minutes}分`;
+        
+        return (result === '期限: あと ') ? '期限: あとわずか' : result.trim();
+    }
+
     /**
     * XSS対策のためのHTMLエスケープ関数
     */

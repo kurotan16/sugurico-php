@@ -190,11 +190,7 @@ function timeLeft(utcDateString) {
     }
 
     // もし1分未満なら「あと少し」と表示
-    if (result === '閲覧可能期限: あと') {
-        result = '閲覧可能期限: あとわずか';
-    }
-
-    return result.trim();
+    return (result === '期限: あと ') ? '期限: あとわずか' : result.trim();
 }
 
 
