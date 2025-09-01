@@ -1,84 +1,96 @@
 //tag_form_supabase.js
 'use strict';
 
-const sleep = (time) => new Promise((resolve) => setTimeout(resolve, time));//timeはミリ秒
-
-
 document.addEventListener('DOMContentLoaded', () => {
     const tagContainer = document.getElementById('tag-container');
-    if (!tagContainer) return; // 該当要素がなければ何もしない
+    const insertButton = document.getElementById('insert-tags');
+    const deleteButton = document.getElementById('delete-tags');
+
+    if (!tagContainer || !insertButton || !deleteButton) {
+        return;
+    }
 
     const maxTags = 10;
 
-    // --- イベントリスナーをコンテナに設定 ---
-    tagContainer.addEventListener('input', handleInput);
-    tagContainer.addEventListener('keydown', handleKeyDown);
+    showButtons();
 
-    /**
-     * テキスト入力時の処理
-     */
-   async function handleInput(event) {
-        const targetInput = event.target;
-        // 最後の入力欄で、値があり、最大数未満なら、新しい入力欄を追加
-        if (isLastInput(targetInput) && targetInput.value.trim() !== '' && tagContainer.children.length < maxTags) {
-            addTagInput();
-            await sleep(1000);
+    // --- [追加]ボタンのクリックイベント ---
+    insertButton.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        const wrappers = tagContainer.querySelectorAll('.tag-input-wrapper');
+        const lastInput = wrappers[wrappers.length - 1].querySelector('input');
+
+        // 直前の入力欄が空でないか
+        if (lastInput.value.trim() === '') {
+            alert('最後のタグ入力欄を埋めてから追加してください。');
+            lastInput.focus();
+            return; // 処理を中断
         }
-    }
 
-    /**
-     * キー入力時の処理（Enter, Backspace）
-     */
-    function handleKeyDown(event) {
-        const targetInput = event.target;
-        if (event.key === 'Enter') {
-            event.preventDefault(); // フォーム送信を防止
-            const nextInput = findNextInput(targetInput);
-            if (nextInput) {
-                nextInput.focus();
-            } else if (tagContainer.children.length < maxTags) {
-                addTagInput();
+        addTagInput();
+        showButtons();
+    });
+
+    // --- [削除]ボタンのクリックイベント ---
+    deleteButton.addEventListener('click', (event) => {
+        event.preventDefault();
+
+        const wrappers = tagContainer.querySelectorAll('.tag-input-wrapper');
+
+        // ▼▼▼ 確認ダイアログを追加 ▼▼▼
+        // 入力欄が1つより多く存在する場合
+        if (wrappers.length > 1) {
+            const lastWrapper = wrappers[wrappers.length - 1];
+            const lastInput = lastWrapper.querySelector('input');
+
+            // 最後の入力欄に何か入力されている場合は、確認メッセージを出す
+            if (lastInput.value.trim() !== '') {
+                if(confirm('最後のタグ「' + lastInput.value + '」を削除しますか？')){
+                    lastWrapper.remove();
+                }
+            } else {
+                // 空の場合は、確認なしで削除
+                lastWrapper.remove();
             }
         }
-        if (event.key === 'Backspace' && targetInput.value === '' && tagContainer.children.length > 1) {
-            const prevInput = findPrevInput(targetInput);
-            if (prevInput) {
-                targetInput.parentElement.remove();
-                prevInput.focus();
-            }
+        showButtons();
+    });
+
+    /**
+     * 新しいタグ入力欄を追加する関数
+     */
+    function addTagInput() {
+       const wrapper = document.createElement('div');
+       wrapper.className = 'tag-input-wrapper';
+       
+       const newInput = document.createElement('input');
+       newInput.type = 'text';
+       newInput.name = 'tags[]';
+       newInput.placeholder = 'タグを入力';
+       newInput.className = 'tag-input';
+
+       wrapper.appendChild(newInput);
+       const buttonContainer = document.getElementById('insert-tags').parentElement;
+       tagContainer.insertBefore(wrapper,buttonContainer);
+
+       newInput.focus();
+
+    }
+
+    function showButtons() {
+        
+        const wrappers = tagContainer.querySelectorAll('.tag-input-wrapper');
+        insertButton.style.display = 'inline';
+        deleteButton.style.display = 'inline';
+        
+        if (wrappers.length === 1) {
+            deleteButton.style.display = 'none';
+        }
+        if (wrappers.length === 10) {
+            insertButton.style.display = 'none';
         }
     }
 
-    /**
-     * 新しいタグ入力欄を追加する
-     */
-     function addTagInput() {
-        if (tagContainer.children.length >= maxTags) return;
-        
-        const wrapper = document.createElement('div');
-        wrapper.className = 'tag-input-wrapper';
-
-        const newInput = document.createElement('input');
-        newInput.type = 'text';
-        newInput.name = 'tags[]'; // PHPで配列として受け取るためのname属性
-        newInput.placeholder = 'タグを入力';
-
-        wrapper.appendChild(newInput);
-        
-        tagContainer.appendChild(wrapper);
-        newInput.focus();
-    }
-
-    // --- ヘルパー関数 ---
-    function isLastInput(input) {
-        return input.parentElement === tagContainer.lastElementChild;
-    }
-    function findNextInput(currentInput) {
-        const nextWrapper = currentInput.parentElement.nextElementSibling;
-        return nextWrapper ? nextWrapper.querySelector('input') : null;
-    }
-    function findPrevInput(currentInput) {
-        const prevWrapper = currentInput.parentElement.previousElementSibling;
-        return prevWrapper ? prevWrapper.querySelector('input') : null;
-    }
+    
 });

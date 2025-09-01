@@ -22,7 +22,7 @@
                 </div>
                 <!-- 本文 -->
                 <div class="form-group">
-                    <label for="textInput"></label>
+                    <label for="textInput">本文</label>
                     <textarea id="textInput" rows="10"></textarea>
                 </div>
                 <!-- 公開期限 -->
@@ -51,7 +51,11 @@
                     <label>タグ (最大10個まで)</label>
                     <div id="tag-container">
                         <div class="tag-input-wrapper">
-                            <input type="text" class="tag-input" placeholder="タグを入力">
+                            <input type="text" name="tags[]" class="tag-input" placeholder="タグを入力">
+                        </div>
+                        <div class="tag-buttons">
+                            <button type="button" id="insert-tags" class="insert-tags">追加</button>
+                            <button type="button" id="delete-tags" class="delete-tags">削除</button>
                         </div>
                     </div>
                 </div>

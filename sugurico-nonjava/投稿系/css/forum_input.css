@@ -212,6 +212,27 @@
     box-sizing: border-box;
 }
 
+.insert-tags, .delete-tags {
+    padding: 12px;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.insert-tags {
+    background-color: #00a2ff; /* 投稿ボタンは緑色に */
+    color: white;
+}
+
+.delete-tags {
+    background-color: #ff0000; /* 投稿ボタンは緑色に */
+    color: white;
+}
+
 /* --- 送信ボタン --- */
 .submit-button {
     width: 100%;
