@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () =>{
             
             // --- 成功 ---
             alert('投稿が完了しました。');
-            window.location.href = '../../メイン系/html/main.html';
+            window.location.href = '../../メイン系/html/index.html';
         } catch (error) {
             messageArea.textContent = '投稿に失敗しました:' + error.message;
             messageArea.className = 'message error';
