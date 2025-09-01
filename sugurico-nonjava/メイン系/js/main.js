@@ -112,6 +112,9 @@ function timeAgo(utcDateString) {
     // 現在の日本時刻を取得
     const now = new Date;
 
+console.log("投稿日時:", postDate.toString());
+console.log("現在日時:", now.toString());
+
     // 差分を秒で計算
     const diffInSeconds = Math.floor((now - postDate) / 1000);
 
@@ -166,7 +169,7 @@ function timeLeft(utcDateString) {
 
     // --- 残り時間の計算 ---
     // 差分をミリ秒で取得
-    let diffInMs = deadline - now;
+    let diffInMs = deadline - now + 9 * 60 *60 * 1000;
 
     // ミリ秒を日、時間、分に変換
     const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));

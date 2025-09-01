@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () =>{
 
     function renderPost(post, tags, images) {
         // 残り時間の計算
-        let remainingTimeHTML = timeLeft(post.delete_date);
+        const remainingTimeHTML = timeLeft(post.delete_date);
 
         // タグのHTMLを生成
         const tagsHTML = tags.map(tag =>`<a href="../../メイン系/html/search.html?keyword=${encodeURIComponent(tag.tag_dic.tag_name)}&type=tag" class="tag-link">#${escapeHTML(tag.tag_dic.tag_name)}</a>`).join(' ');
@@ -146,23 +146,15 @@ document.addEventListener('DOMContentLoaded', async () =>{
      * コメント一覧を取得して描画する
      */
     async function fetchAndRenderComments() {
-        const {
-            data: comments,error
-        } = await supabaseClient
-                    .from('comments')
-                    .select(`
-                        comment_id,
-                        comment_text,
-                        created_at,
-                        users ( user_name )
-                        `)
-                    .eq('forum_id', forumId)
-                    .order('created_at', {ascending:false});
-
+        const { data: comments, error } = await supabaseClient
+            .from('comments')
+            .select('comment_id, comment_text, created_at, user_id_auth, users(user_name)')
+            .eq('forum_id', forumId)
+            .order('created_at', { ascending: false });
 
         if (error) {
             commentListContainer.innerHTML = '<p>コメントの読み込みに失敗しました。</p>';
-            return;  
+            return;
         }
         renderComments(comments);
     }
@@ -172,24 +164,47 @@ document.addEventListener('DOMContentLoaded', async () =>{
      */
 
     function renderComments(comments) {
-        console.log(comments);
-        if(comments && comments.length > 0){
-            
+        if (comments && comments.length > 0) {
             commentListContainer.innerHTML = comments.map(
                 comment => {
                     const commentTimeAgo = timeAgo(comment.created_at);
-                    
+                    let deleteButtonHTML = '';
+                    if (currentUser && currentUser.id === comment.user_id_auth) {
+                        deleteButtonHTML = `<button class="delete-comment-button" data-comment-id="${comment.comment_id}">削除</button>`;
+                    }
                     return `
                         <div class="comment-item">
-                            <strong>${escapeHTML(comment.users?.user_name || '不明')}:</strong>
+                            <div class="comment-header">
+                                <strong>${escapeHTML(comment.users?.user_name || '不明')}:</strong>
+                                ${deleteButtonHTML}
+                            </div>
                             <p>${nl2br(comment.comment_text)}</p>
                             <small>${commentTimeAgo}</small>
                         </div>
                     `;
                 }
             ).join('');
+            attachDeleteButtonListeners();
         } else {
-            commentListContainer.innerHTML = "<p>まだコメントはありません。</p>"
+            commentListContainer.innerHTML = "<p>まだコメントはありません。</p>";
+        }
+    }
+
+    function attachDeleteButtonListeners() {
+        document.querySelectorAll('.delete-comment-button').forEach(button => {
+            button.addEventListener('click', handleDeleteComment);
+        });
+    }
+
+    async function handleDeleteComment(event) {
+        const commentId = event.target.dataset.commentId;
+        if (!confirm('このコメントを本当に削除しますか？')) return;
+        try {
+            const { error } = await supabaseClient.from('comments').delete().eq('comment_id', commentId);
+            if (error) throw error;
+            await fetchAndRenderComments();
+        } catch (error) {
+            alert('コメントの削除に失敗しました: ' + error.message);
         }
     }
     
@@ -209,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () =>{
     const now = new Date;
 
     // 差分を秒で計算
-    const diffInSeconds = Math.floor((now - postDate) / 1000);
+    const diffInSeconds = Math.floor((now - postDate) / 1000) - 9 * 60 * 60;
 
     // 差分に応じて表示を切り替え
     const minutes = Math.floor(diffInSeconds / 60);
@@ -247,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async () =>{
         const now = new Date();
         if (deadline <= now) return ''; 
         
-        let diffInMs = deadline - now;
+        let diffInMs = deadline - now + 9 * 60 * 60 * 1000;
         const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
         diffInMs -= days * (1000 * 60 * 60 * 24);
         const hours = Math.floor(diffInMs / (1000 * 60 * 60));
