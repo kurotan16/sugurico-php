@@ -48,7 +48,8 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
                 title,
                 text,
                 delete_date,
-                users ( user_name )
+                users ( user_name ),
+                forum_images ( image_url ) 
             `)
             .or('delete_date.is.null,delete_date.gt.now()') // 公開期限のチェック
             .order('forum_id', { ascending: false }) // 新しい順
@@ -66,29 +67,38 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
         
         if (error) throw error;
 
+        console.log("Supabaseから取得した投稿データ:", posts); // デバッグ用ログ
+
         // --- HTMLの組み立て ---
         if (posts.length > 0) {
             container.innerHTML = posts.map(post => {
-                // 残り時間の計算（PHPのロジックをJSに移植）
-                let remainingTime = '<small style="color:gray;">閲覧可能期間: 無期限</small>';
-                if (post.delete_date) {
-                    const now = new Date();
-                    const deleteDate = new Date(post.delete_date);
-                    if (now < deleteDate) {
-                        // 簡単な残り時間表示（より正確な計算も可能）
-                        remainingTime = `<small style="color:gray;">閲覧可能期間: ${deleteDate.toLocaleString()}まで</small>`;
-                    }
-                }
-                
+                // ▼▼▼ ここからHTML生成部分を修正 ▼▼▼
 
+                // 1. 画像サムネイルのHTMLを準備
+                let thumbnailHTML = '';
+                // もし画像があり、その配列が空でなければ
+                if (post.forum_images && post.forum_images.length > 0) {
+                    // 1枚目の画像のURLを使ってimgタグを生成
+                    thumbnailHTML = `<div class="post-item-thumbnail"><img src="${post.forum_images[0].image_url}" alt="投稿画像"></div>`;
+                }
+
+                // 2. 閲覧期限のHTMLを準備 (ここは既存のコード)
+                let remainingTime = '<small style="color:gray;">閲覧可能期間: 無期限</small>';
+                // ... (中略) ...
+
+                // 3. 最終的なHTMLを組み立てる
+                // post-itemにクラスを追加し、thumbnailHTMLを配置
                 return `
-                    <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}">
-                        <article class="post-item">
-                            <h3>${escapeHTML(post.title)}</h3>
-                            <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
-                            <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
-                            <br>
-                            ${remainingTime}
+                    <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
+                        <article class="post-item ${thumbnailHTML ? 'has-thumbnail' : ''}">
+                            ${thumbnailHTML}
+                            <div class="post-item-content">
+                                <h3>${escapeHTML(post.title)}</h3>
+                                <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
+                                <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
+                                <br>
+                                ${remainingTime}
+                            </div>
                         </article>
                     </a>
                 `;
