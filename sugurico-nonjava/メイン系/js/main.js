@@ -84,6 +84,14 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
 
                 // 2. 閲覧期限のHTMLを準備 (ここは既存のコード)
                 let remainingTime = '<small style="color:gray;">閲覧可能期間: 無期限</small>';
+                if (post.delete_date) {
+                    const now = new Date();
+                    const deleteDate = new Date(post.delete_date);
+                    if (now < deleteDate) {
+                        // 簡単な残り時間表示（より正確な計算も可能）
+                        remainingTime = `<small style="color:gray;">閲覧可能期間: ${deleteDate.toLocaleString()}まで</small>`;
+                    }
+                }
                 // ... (中略) ...
 
                 // 3. 最終的なHTMLを組み立てる
