@@ -11,21 +11,22 @@
         <header id="header-container"></header>
         
         <h1>ようこそ、スグリコへ！</h1>
-        
-        <!-- 「あなたの投稿」を表示するエリア（ログイン時のみ表示） -->
-         
-        <section id="my-posts-section" style="display: none;">
-            <hr>
-            <h2>あなたの投稿</h2>
-            <div id="my-posts-list" class="post-list">
-                <!-- JSでここに投稿が挿入される -->    
-            </div>
-        </section>
 
-        <hr>
-        <h2>皆さんの投稿</h2>
-        <div id="all-posts-list" class="post-list">
-            <!-- JSでここに投稿が挿入される -->
+        <div class="posts-container">
+            <!-- 「あなたの投稿」を表示するエリア（ログイン時のみ表示） -->
+            <section id="my-posts-section" class="posts-column" style="display: none;">
+                <h2>あなたの投稿</h2>
+                <div id="my-posts-list" class="post-list">
+                    <!-- JSでここに投稿が挿入される -->    
+                </div>
+            </section>
+
+            <section id="all-posts-section" class="posts-column">
+                <h2>皆さんの投稿</h2>
+                <div id="all-posts-list" class="post-list">
+                    <!-- JSでここに投稿が挿入される -->
+                </div>
+            </section>
         </div>
         <!-- 新規投稿ボタン（ログイン時のみ表示） -->
          
