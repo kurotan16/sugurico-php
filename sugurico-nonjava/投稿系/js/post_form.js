@@ -79,7 +79,10 @@ document.addEventListener('DOMContentLoaded', async () =>{
         if(!files || files.length ===0) return uploadedUrls;
 
         for (const file of files) {
-            const fileName = `${user.id}/${Date.now()}_${file.name}`;
+            const fileExt = file.name.split('.').pop(); // ファイルの拡張子を取得 (例: "png")
+            const randomName = crypto.randomUUID(); // ランダムなファイル名を生成
+            const fileName = `${user.id}/${randomName}.${fileExt}`; // 新しいファイル名を作成
+            
             const {data, error} = await supabaseClient
             .storage
             .from('post-images') // ★バケツ名
