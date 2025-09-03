@@ -79,21 +79,9 @@ document.addEventListener('DOMContentLoaded', async () =>{
      */
 
     function renderPost(post, tags, images) {
-        // 残り時間の計算
-        let remainingTimeHTML = '<small class="post-meta">閲覧可能期間: 無期限</small>';
-        if(post.delete_date) {
-            const deleteDate = new Date(post.delete_date);
+        const remainingTimeHTML = timeLeft(post.delete_date);
+        const timeAgoHTML = timeAgo(post.created_at);
 
-            if (new Date() < deleteDate) {
-                // (簡易的な残り時間表示)
-                // ▼▼▼ この部分を修正 ▼▼▼
-                const formattedDeleteDate = deleteDate.toLocaleString('ja-JP', {
-                    timeZone: 'Asia/Tokyo',
-                    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
-                });
-                remainingTimeHTML = `<small class="post-meta">閲覧期限: ${formattedDeleteDate}</small>`;
-            }
-        }
         // タグのHTMLを生成
         const tagsHTML = tags.map(tag =>`<a href="../../メイン系/html/search.html?keyword=${encodeURIComponent(tag.tag_dic.tag_name)}&type=tag" class="tag-link">#${escapeHTML(tag.tag_dic.tag_name)}</a>`).join(' ');
 
@@ -105,6 +93,7 @@ document.addEventListener('DOMContentLoaded', async () =>{
         postContainer.innerHTML = `
             <h1>${escapeHTML(post.title)}</h1>
             <p class="post-meta">投稿者: ${escapeHTML(post.users.user_name)}</p>
+            <p class="post-meta">投稿日時: ${timeAgoHTML}</p>
             <div class="post-images-container">${imagesHTML}</div>
             <div class="post-content">${nl2br(escapeHTML(post.text))}</div>
             <div class="post-tags">${tagsHTML}</div>
@@ -189,23 +178,13 @@ document.addEventListener('DOMContentLoaded', async () =>{
             
             commentListContainer.innerHTML = comments.map(
                 comment => {
-                    // ▼▼▼ この部分を修正 ▼▼▼
-                    // タイムゾーンを'Asia/Tokyo'に指定し、表示形式も整える
-                    const commentDate = new Date(comment.created_at).toLocaleString('ja-JP', {
-                        timeZone: 'Asia/Tokyo',
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    // ▲▲▲ 修正ここまで ▲▲▲
+                    const commentTimeAgo = timeAgo(comment.created_at);
                     
                     return `
                         <div class="comment-item">
                             <strong>${escapeHTML(comment.users?.user_name || '不明')}:</strong>
                             <p>${nl2br(comment.comment_text)}</p>
-                            <small>${commentDate}</small>
+                            <small>${commentTimeAgo}</small>
                         </div>
                     `;
                 }
@@ -214,35 +193,6 @@ document.addEventListener('DOMContentLoaded', async () =>{
             commentListContainer.innerHTML = "<p>まだコメントはありません。</p>"
         }
     }
-    /**
-    * XSS対策のためのHTMLエスケープ関数
-    */
-    function escapeHTML(str) {
-        if (!str) return '';
-        return str.replace(/[&<>"']/g, match => 
-            ({
-                '&': '&',
-                '<': '<',
-                '>': '>',
-                '"': '"',
-                // ★★★ ここを修正 ★★★
-                // "'": "'" // シングルクォートをHTMLエンティティに変換
-            })[match]
-        );
-    }
-
-    /**
-     * 改行文字を<br>タグに変換する関数（XSS対策済み）
-     * @param {any} str - 変換する文字列
-     * @returns {string} - <br>タグを含む安全なHTML文字列
-     */
-    function nl2br(str) {
-        // まず、HTMLとして危険な文字をすべてエスケープする
-        const escapedStr = escapeHTML(str);
-        // その後で、安全になった文字列の改行を<br>に変換する
-        return escapedStr.replace(/\r\n|\n\r|\r|\n/g, '<br>');
-    }
-
 });
 
 
