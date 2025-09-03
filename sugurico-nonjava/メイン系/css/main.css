@@ -123,3 +123,32 @@ header nav  a {
         gap: 20px;
     }
 }
+/* --- index.html の投稿サムネイル用スタイル --- */
+
+/* 画像あり(has-thumbnail)の投稿アイテムをFlexboxに設定 */
+.post-item.has-thumbnail {
+    display: flex;
+    align-items: center; /* 上下中央揃え */
+    gap: 15px; /* 画像とテキストの間の隙間 */
+}
+
+/* サムネイル画像のコンテナ */
+.post-item-thumbnail {
+    flex-shrink: 0; /* コンテナが縮まないようにする */
+    width: 120px;   /* サムネイルの横幅 */
+    height: 90px;   /* サムネイルの高さ */
+    border-radius: 4px;
+    overflow: hidden; /* はみ出した画像を隠す */
+}
+
+/* サムネイル画像そのもの */
+.post-item-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 画像の比率を保ったまま、コンテナ全体を覆うように調整 */
+}
+
+/* テキストコンテンツ部分 */
+.post-item-content {
+    flex-grow: 1; /* 残りのスペースをすべて使う */
+}

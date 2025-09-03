@@ -45,11 +45,11 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
             .from('forums')
             .select(`
                 forum_id,
-                created_at,
                 title,
                 text,
                 delete_date,
-                users ( user_name )
+                users ( user_name ),
+                forum_images ( image_url ) 
             `)
             .or('delete_date.is.null,delete_date.gt.now()') // 公開期限のチェック
             .order('forum_id', { ascending: false }) // 新しい順
@@ -67,23 +67,46 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
         
         if (error) throw error;
 
+        console.log("Supabaseから取得した投稿データ:", posts); // デバッグ用ログ
+
         // --- HTMLの組み立て ---
         if (posts.length > 0) {
             container.innerHTML = posts.map(post => {
-                const timeAgoString = timeAgo(post.created_at);
+                // ▼▼▼ ここからHTML生成部分を修正 ▼▼▼
 
-                const remainingTime = timeLeft(post.delete_date);
-                
+                // 1. 画像サムネイルのHTMLを準備
+                let thumbnailHTML = '';
+                // もし画像があり、その配列が空でなければ
+                if (post.forum_images && post.forum_images.length > 0) {
+                    // 1枚目の画像のURLを使ってimgタグを生成
+                    thumbnailHTML = `<div class="post-item-thumbnail"><img src="${post.forum_images[0].image_url}" alt="投稿画像"></div>`;
+                }
 
+                // 2. 閲覧期限のHTMLを準備 (ここは既存のコード)
+                let remainingTime = '<small style="color:gray;">閲覧可能期間: 無期限</small>';
+                if (post.delete_date) {
+                    const now = new Date();
+                    const deleteDate = new Date(post.delete_date);
+                    if (now < deleteDate) {
+                        // 簡単な残り時間表示（より正確な計算も可能）
+                        remainingTime = `<small style="color:gray;">閲覧可能期間: ${deleteDate.toLocaleString()}まで</small>`;
+                    }
+                }
+                // ... (中略) ...
+
+                // 3. 最終的なHTMLを組み立てる
+                // post-itemにクラスを追加し、thumbnailHTMLを配置
                 return `
-                    <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}">
-                        <article class="post-item">
-                            <small style="color:gray;">${timeAgoString}</small>
-                            <h3>${escapeHTML(post.title)}</h3>
-                            <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
-                            <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
-                            <br>
-                            <small style ='color:gray'>${remainingTime}</small>
+                    <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
+                        <article class="post-item ${thumbnailHTML ? 'has-thumbnail' : ''}">
+                            ${thumbnailHTML}
+                            <div class="post-item-content">
+                                <h3>${escapeHTML(post.title)}</h3>
+                                <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
+                                <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
+                                <br>
+                                ${remainingTime}
+                            </div>
                         </article>
                     </a>
                 `;
@@ -99,115 +122,16 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
 }
 
 /**
- * UTCの日時文字列を、日本の現在時刻からの相対時間文字列に変換する
- * 例: "3分前", "5時間前", "2日前"
- * @param {string} utcDateString - Supabaseから取得したUTCの日時文字列
- * @returns {string} - 相対時間文字列
- */
-function timeAgo(utcDateString) {
-    if (!utcDateString) return '';
-
-    // Supabaseから受け取ったUTC時刻をDateオブジェクトに変換
-    const postDate = new Date(utcDateString);
-    // 現在の日本時刻を取得
-    const now = new Date;
-
-console.log("投稿日時:", postDate.toString());
-console.log("現在日時:", now.toString());
-
-    // 差分を秒で計算
-    const diffInSeconds = Math.floor((now - postDate) / 1000);
-
-    // 差分に応じて表示を切り替え
-    const minutes = Math.floor(diffInSeconds / 60);
-    if(minutes < 1) {
-        return "たった今";
-    }
-    if (minutes < 60) {
-        return `${minutes}分前`
-    }
-
-    const hours = Math.floor(minutes / 60);
-    if(hours < 24) {
-        return `${hours}時間前`;
-    }
-
-    const days = Math.floor(hours / 24);
-    if (days < 30) {
-        return `${days}日前`;
-    }
-
-    const months = Math.floor(days / 30);
-    if (months < 12) {
-        return `${months}ヶ月前`
-    }
-
-    const years = Math.floor(months / 12);
-    return `${years}年前`;
-}
-
-/**
- * UTCの日時文字列から、日本の現在時刻までの残り時間を計算して文字列を返す
- * 例: "期限: あと2日 10時間 5分"
- * @param {string | null} utcDateString - Supabaseから取得した期限のUTC日時文字列
- * @returns {string} - 残り時間の文字列
- */
-function timeLeft(utcDateString) {
-    // 期限が設定されていない（無期限の）場合は、その旨を返す
-    if (!utcDateString) {
-        return '閲覧可能期限: 無期限';
-    }
-    
-    const deadline = new Date(utcDateString);
-    const now = new Date();
-
-    // 期限がすでに過ぎている場合は、表示しないか「期限切れ」と表示
-    if (deadline <= now) {
-        // ここでは何も表示しないようにする
-        return '';
-    }
-
-    // --- 残り時間の計算 ---
-    // 差分をミリ秒で取得
-    let diffInMs = deadline - now + 9 * 60 *60 * 1000;
-
-    // ミリ秒を日、時間、分に変換
-    const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-    diffInMs -= days * (1000 * 60 * 60 *24);
-
-    const hours = Math.floor(diffInMs / (1000 * 60 * 60));
-    diffInMs -= hours * (1000 * 60 * 60);
-
-    const minutes = Math.floor(diffInMs / (1000 * 60));
-
-    // --- 表示文字列の組み立て ---
-    let result = '閲覧可能期限: あと';
-    if (days > 0) {
-        result += `${days}日`;
-    }
-    if (hours > 0) {
-        result += `${hours}時間`;
-    }
-    if (minutes > 0) {
-        result += `${minutes}分`;
-    }
-
-    // もし1分未満なら「あと少し」と表示
-    return (result === '期限: あと ') ? '期限: あとわずか' : result.trim();
-}
-
-
-/**
  * XSS対策のためのHTMLエスケープ関数
  */
-function escapeHTML(str) {
+/*function escapeHTML(str) {
     return str.replace(/[&<>"']/g, function(match) {
         return {
             '&': '&',
             '<': '<',
             '>': '>',
             '"': '"',
-            "'": "'"
+            "'": '''
         }[match];
     });
-}
+}*/

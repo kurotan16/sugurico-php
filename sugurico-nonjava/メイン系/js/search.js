@@ -99,20 +99,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     // -----------------------------
 
     function renderPostHTML(post) {
-        const timeAgoString = timeAgo(post.created_at);
-        const remainingTime = timeLeft(post.delete_date);
+        let remainingTimeHTML = '';
+        if (post.delete_date && new Date(post.delete_date) > new Date()) {
+            remainingTimeHTML = `<small class="post-meta">閲覧期限: ${new Date(post.delete_date).toLocaleString()}</small>`;
+        } else if (!post.delete_date) {
+            remainingTimeHTML = '<small class="post-meta">閲覧可能期間: 無期限</small>';
+        }
+
         return `
-            <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}">
+            <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
                 <article class="post-item">
-                    <small style="color:gray;">${timeAgoString}</small>
-                        <h3>${escapeHTML(post.title)}</h3>
-                        <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
-                        <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
-                        <br>
-                        <small style ='color:gray'>${remainingTime}</small>
-                    </article>
-                </a>
-                `;
+                    <h3>${escapeHTML(post.title)}</h3>
+                    <p>${nl2br(post.text)}</p>
+                    <small class="post-meta">投稿者: ${escapeHTML(post.users?.user_name || '不明')}</small>
+                    <br>
+                    ${remainingTimeHTML}
+                </article>
+            </a>
+        `;
     }
 
     function renderPagination(totalItems, currentPage, itemsPerPage, keyword, type) {
@@ -142,74 +146,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         paginationContainer.innerHTML = paginationHTML;
-    }
-    
-    function timeAgo(utcDateString) {
-        if (!utcDateString) return '';
-        const postDate = new Date(utcDateString);
-        const now = new Date;
-        const diffInSeconds = Math.floor((now - postDate) / 1000);
-        const minutes = Math.floor(diffInSeconds / 60);
-        
-        if(minutes < 1) {
-            return "たった今";
-        }
-        if (minutes < 60) {
-            return `${minutes}分前`
-        }
-        
-        const hours = Math.floor(minutes / 60);
-        if(hours < 24) {
-            return `${hours}時間前`;
-        }
-
-        const days = Math.floor(hours / 24);
-        if (days < 30) {
-            return `${days}日前`;
-        }
-
-        const months = Math.floor(days / 30);
-        if (months < 12) {
-            return `${months}ヶ月前`
-        }
-
-        const years = Math.floor(months / 12);
-        return `${years}年前`;
-    }
-    
-    function timeLeft(utcDateString) {
-        if (!utcDateString) {
-            return '閲覧可能期限: 無期限';
-        }
-        
-        const deadline = new Date(utcDateString);
-        const now = new Date();
-
-        if (deadline <= now) {
-            return '';
-        }
-        
-        let diffInMs = deadline - now + 9 * 60 *60 * 1000;
-        
-        const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-        diffInMs -= days * (1000 * 60 * 60 *24);
-
-        const hours = Math.floor(diffInMs / (1000 * 60 * 60));
-        diffInMs -= hours * (1000 * 60 * 60);
-
-        const minutes = Math.floor(diffInMs / (1000 * 60));
-        
-        let result = '閲覧可能期限: あと';
-        if (days > 0) {
-            result += `${days}日`;
-        }
-        if (hours > 0) {
-            result += `${hours}時間`;
-        }
-        if (minutes > 0) {
-            result += `${minutes}分`;
-        }
-        return (result === '期限: あと ') ? '期限: あとわずか' : result.trim();
     }
 
     function escapeHTML(str) {
