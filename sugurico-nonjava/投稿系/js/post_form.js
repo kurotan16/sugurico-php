@@ -205,7 +205,9 @@ document.addEventListener('DOMContentLoaded', async () =>{
      */
     function calculateDeleteDate(expiresOption){
         if(expiresOption === 'permanent') return null;
+        
         const date = new Date();
+        if (expiresOption === 'private') return date;
         const days = parseInt(expiresOption.replace('day', ''));
         date.setDate(date.getDate() + days);
         return date.toISOString();
