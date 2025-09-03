@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // --- 3. 投稿データを取得 ---
         let posts = [];
         if ((type === 'tag' && pagedForumIds.length > 0) || (type !== 'tag' && totalPosts > 0)) {
-            let query = supabaseClient.from('forums').select('*, users(user_name)');
+            let query = supabaseClient.from('forums').select('*, users(user_name),forum_images ( image_url ) ');
 
             if (type === 'tag') {
                 query = query.in('forum_id', pagedForumIds);
@@ -118,24 +118,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // -----------------------------
 
     function renderPostHTML(post) {
-        let remainingTimeHTML = '';
-        if (post.delete_date && new Date(post.delete_date) > new Date()) {
-            remainingTimeHTML = `<small class="post-meta">閲覧期限: ${new Date(post.delete_date).toLocaleString()}</small>`;
-        } else if (!post.delete_date) {
-            remainingTimeHTML = '<small class="post-meta">閲覧可能期間: 無期限</small>';
+        let thumbnailHTML = '';
+        if (post.forum_images && post.forum_images.length > 0) {
+            thumbnailHTML = `<div class="post-item-thumbnail"><img src="${post.forum_images[0].image_url}" alt="投稿画像"></div>`;
         }
+        const remainingTime = timeLeft(post.delete_date);
+        const timeAgoString = timeAgo(post.created_at);
 
         return `
-            <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
-                <article class="post-item">
-                    <h3>${escapeHTML(post.title)}</h3>
-                    <p>${nl2br(post.text)}</p>
-                    <small class="post-meta">投稿者: ${escapeHTML(post.users?.user_name || '不明')}</small>
-                    <br>
-                    ${remainingTimeHTML}
-                </article>
-            </a>
-        `;
+                    <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
+                        <article class="post-item ${thumbnailHTML ? 'has-thumbnail' : ''}">
+                            ${thumbnailHTML}
+                            <div class="post-item-content">
+                            <small style="color:gray;">${timeAgoString}</small>    
+                            <h3>${escapeHTML(post.title)}</h3>
+                                <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
+                                <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
+                                <br>
+                                <small style="color:gray;">${remainingTime}</small>
+                            </div>
+                        </article>
+                    </a>
+                `;
     }
 
     function renderPagination(totalItems, currentPage, itemsPerPage, keyword, type) {
@@ -167,19 +171,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         paginationContainer.innerHTML = paginationHTML;
     }
 
-    function escapeHTML(str) {
-        if (!str) return '';
-        return str.toString().replace(/[&<>"']/g, m => ( {
-            '&': '&amp;',
-            '<': '&lt;',
-            '>': '&gt;',
-            '"': '&quot;',
-            "'": '&#39;'
-        })[m]);
-    }
-
-    function nl2br(str) {
-        return escapeHTML(str).replace(/\r\n|\n\r|\r|\n/g, '<br>');
-    }
 
 });
