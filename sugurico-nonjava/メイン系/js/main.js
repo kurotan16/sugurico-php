@@ -48,6 +48,7 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
                 title,
                 text,
                 delete_date,
+                created_at,
                 users ( user_name ),
                 forum_images ( image_url ) 
             `)
@@ -83,16 +84,8 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
                 }
 
                 // 2. 閲覧期限のHTMLを準備 (ここは既存のコード)
-                let remainingTime = '<small style="color:gray;">閲覧可能期間: 無期限</small>';
-                if (post.delete_date) {
-                    const now = new Date();
-                    const deleteDate = new Date(post.delete_date);
-                    if (now < deleteDate) {
-                        // 簡単な残り時間表示（より正確な計算も可能）
-                        remainingTime = `<small style="color:gray;">閲覧可能期間: ${deleteDate.toLocaleString()}まで</small>`;
-                    }
-                }
-                // ... (中略) ...
+                const remainingTime = timeLeft(post.delete_date);
+                const timeAgoString = timeAgo(post.created_at);
 
                 // 3. 最終的なHTMLを組み立てる
                 // post-itemにクラスを追加し、thumbnailHTMLを配置
@@ -101,11 +94,12 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
                         <article class="post-item ${thumbnailHTML ? 'has-thumbnail' : ''}">
                             ${thumbnailHTML}
                             <div class="post-item-content">
-                                <h3>${escapeHTML(post.title)}</h3>
+                            <small style="color:gray;">${timeAgoString}</small>    
+                            <h3>${escapeHTML(post.title)}</h3>
                                 <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
                                 <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
                                 <br>
-                                ${remainingTime}
+                                <small style="color:gray;">${remainingTime}</small>
                             </div>
                         </article>
                     </a>
@@ -121,17 +115,4 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
     }
 }
 
-/**
- * XSS対策のためのHTMLエスケープ関数
- */
-/*function escapeHTML(str) {
-    return str.replace(/[&<>"']/g, function(match) {
-        return {
-            '&': '&',
-            '<': '<',
-            '>': '>',
-            '"': '"',
-            "'": '''
-        }[match];
-    });
-}*/
+

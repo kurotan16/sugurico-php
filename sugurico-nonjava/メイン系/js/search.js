@@ -1,3 +1,5 @@
+// search.js
+
 'use strict';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -22,6 +24,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         const postsPerPage = 10;
+        let query;
+
+        const visibilityFilter = 'delete_date.is.null,delete_date.gt.now()';
+
+        if(type === 'tag') {
+            const {data:forumIdsData, error: forumIdsError} = await supabaseClient
+            .from('tag')
+            .select('forums!inner(forum_id, delete_date)')
+            .like('tag_dic, tag_name', `%${keyword}%`)
+            .or(visibilityFilter, {referencedTable: 'forums'});
+
+            if (forumIdsError) throw forumIdsError;
+            const ids = forumIdsData.map(f => f.forums.forum_id);
+
+            query = (ids.length > 0) ?
+                supabaseClient.from('forums').select(`*,users ( user_name )`).in('forum_id', ids)
+                :null;
+        } else {
+            const column = (type === 'title') ? 'title' : 'text';
+            query = supabaseClient.from('forums')
+                .select(`*,users ( user_name )`)
+                .like(column, `%${keyword}%`)
+                .or(visibilityFilter);
+        }
+
         let totalPosts = 0;
         let posts = [];
 
@@ -86,12 +113,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .range(offset, offset + postsPerPage - 1);
 
             if (error) throw error;
-            posts = data;
-        }
 
-        searchCount.textContent = `${totalPosts}件の投稿が見つかりました。`;
+            console.log("Supabaseから取得した検索結果データ:", data); // デバッグ用ログ
+            posts = data;
+            totalPosts = data.length ?? 0;
+        }
+        
+
+
 
         if (posts.length > 0) {
+            searchCount.textContent = `${totalPosts}件の投稿が見つかりました。`;
             postsListContainer.innerHTML = posts.map(post => renderPostHTML(post)).join('');
         } else {
             postsListContainer.innerHTML = '<p>該当する投稿は見つかりませんでした。</p>';

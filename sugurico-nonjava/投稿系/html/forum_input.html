@@ -29,6 +29,7 @@
                 <div class="form-group">
                     <label for="expireSelect">公開期限</label>
                     <select id="expireSelect">
+                        <option value="private">非公開</option>
                         <option value="1day">1日後</option>
                         <option value="2days">2日後</option>
                         <option value="3days">3日後</option>
@@ -41,11 +42,25 @@
                     <!-- プレミアム機能は後でJSで表示制御 -->
                 </div>
                 <!-- 画像添付 -->
-                <div class="form-group">
-                    <label for="imagesInput">画像 (最大3枚まで)</label>
-                    <input type="file" id="imagesInput" multiple accept="image/*">
+                 <div class="form-group">
+                    <label>画像 (最大<span id="max-images-count">3</span>枚まで)</label>
+                    
+                    <!-- 画像入力欄を管理するコンテナ -->
+                    <div id="image-input-container">
+                        <div class="image-input-wrapper">
+                            <input type="file" name="images[]" class="image-input" accept="image/*">
+                        </div>
+                    </div>
+                    <!-- 操作ボタン -->
+                    <div class="image-buttons" style="margin-top: 10px;">
+                        <button type="button" id="add-image-button" class="insert-button">画像を追加</button>
+                        <button type="button" id="remove-image-button" class="delete-button">最後の画像を削除</button>
+                    </div>
+                    <!-- 画像プレビューを表示するエリア -->
                     <div id="image-preview-container"></div>
-                </div>
+                 </div>
+
+                
                 <!-- タグ -->
                 <div class="form-group">
                     <label>タグ (最大10個まで)</label>
@@ -54,8 +69,8 @@
                             <input type="text" name="tags[]" class="tag-input" placeholder="タグを入力">
                         </div>
                         <div class="tag-buttons">
-                            <button type="button" id="insert-tags" class="insert-tags">追加</button>
-                            <button type="button" id="delete-tags" class="delete-tags">削除</button>
+                            <button type="button" id="insert-tags" class="insert-button">追加</button>
+                            <button type="button" id="delete-tags" class="delete-button">削除</button>
                         </div>
                     </div>
                 </div>

@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', async () =>{
     const submitButton = document.getElementById('submitButton');
     const messageArea = document.getElementById('message-area');
 
+    // ★ IDではなく、クラスを持つ "すべて" の画像入力欄を対象にするコンテナを取得
+    const imageInputContainer = document.getElementById('image-input-container');
+
     // --- ログインチェック ---
     const {data: {user} } = await supabaseClient.auth.getUser();
     if(!user){
@@ -29,7 +32,16 @@ document.addEventListener('DOMContentLoaded', async () =>{
 
         try {
             // --- 1. 画像をSupabase Storageにアップロード ---
-            const imageUrls = await uploadImages(imagesInput.files);
+            // ★ コンテナの中から、すべてのファイル入力欄を取得
+            const imageInputs = imageInputContainer.querySelectorAll('.image-input');
+            const filesToUpload = [];
+            imageInputs.forEach(input => {
+                if (input.files[0]) {
+                    filesToUpload.push(input.files[0]);
+                }
+            });
+            // ★ 収集したファイルのリストをアップロード関数に渡す
+            const imageUrls = await uploadImages(filesToUpload);
 
             // --- 2. 投稿本体(forumsテーブル)をDBに保存 ---
             const{data: savedForum,
@@ -76,22 +88,30 @@ document.addEventListener('DOMContentLoaded', async () =>{
 
     async function uploadImages(files) {
         const uploadedUrls = [];
-        if(!files || files.length ===0) return uploadedUrls;
+        if(!files || files.length === 0) return uploadedUrls;
 
-        for (const file of files) {
-            const fileExt = file.name.split('.').pop(); // ファイルの拡張子を取得 (例: "png")
-            const randomName = crypto.randomUUID(); // ランダムなファイル名を生成
-            const fileName = `${user.id}/${randomName}.${fileExt}`; // 新しいファイル名を作成
-            
-            const {data, error} = await supabaseClient
-            .storage
-            .from('post-images') // ★バケツ名
-            .upload(fileName, file);
+        // ★ forEachではなく、Promise.allで並列アップロードすると高速
+        const uploadPromises = Array.from(files).map(file => {
+            const fileExt = file.name.split('.').pop();
+            const randomName = crypto.randomUUID();
+            const fileName = `${user.id}/${randomName}.${fileExt}`;
 
-            if(error) throw new Error ('画像アップロードに失敗' + error.message);
+            return supabaseClient
+                .storage
+                .from('post-images')
+                .upload(fileName, file);
+        });
 
-            // 公開URLを取得
-            const {data:{publicUrl}} = supabaseClient.storage.from('post-images').getPublicUrl(fileName);
+        // すべてのアップロードが完了するのを待つ
+        const results = await Promise.all(uploadPromises);
+        
+        // 成功したものの公開URLを取得
+        for (const result of results) {
+            if(result.error) {
+                // 1つでも失敗したらエラーを投げる
+                throw new Error('画像アップロードに失敗:' + result.error.message);
+            }
+            const {data:{publicUrl}} = supabaseClient.storage.from('post-images').getPublicUrl(result.data.path);
             uploadedUrls.push(publicUrl);
         }
         return uploadedUrls;
@@ -185,7 +205,9 @@ document.addEventListener('DOMContentLoaded', async () =>{
      */
     function calculateDeleteDate(expiresOption){
         if(expiresOption === 'permanent') return null;
+        
         const date = new Date();
+        if (expiresOption === 'private') return date;
         const days = parseInt(expiresOption.replace('day', ''));
         date.setDate(date.getDate() + days);
         return date.toISOString();
