@@ -11,70 +11,77 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
 /**
- * ページのヘッダーを動的に生成・表示する関数
+ * ページのヘッダー フッターを動的に生成・表示する関数
  */
-async function setupHeader() {
+async function setupHeaderAndFooter() {
     const headerContainer = document.getElementById('header-container');
     const footerContainer = document.getElementById('footer-container');
-    if (!headerContainer) return;
 
-    // --- ログイン状態を取得 ---
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    console.log("現在のセッション情報:", session);
-    let headerHTML = '';
-
-    if (session) {
-        // 【ログインしている場合のヘッダー】
-        const userName = session.user.user_metadata.user_name|| 'ユーザー';
-        console.log(userName);
-        headerHTML = `
-            <h1><a href="../../メイン系/html/index.html">スグリコ</a></h1>
-            <nav>
-                <a href="../../ログイン系/html/mypage.html">${escapeHTML(userName)}さん</a>
-                <a href="#" id="logout-button">ログアウト</a>
-            </nav>
-        `;
-    } else {
-        // 【ログインしていない場合のヘッダー】
-        headerHTML = `
-            <h1><a href="../../メイン系/html/index.html">スグリコ</a></h1>
-            <nav>
-                <a href="../../ログイン系/html/login.html">ログイン</a>
-                <a href="../../ログイン系/html/signin.html">新規登録</a>
-            </nav>
-        `;
+    if(!headerContainer || !footerContainer) {
+        console.warn('header-containerまたはfooter-containerが見つかりません。');
+        return;
     }
 
-    headerHTML += `
-    <div class="search-form-container">
-        <form action="../../メイン系/html/search.html" method="get">
-            <input type="text" name="keyword" placeholder="キーワードで検索...">
-            <select name="type" id="content">
-                <option value="title">タイトル</option>
-                <option value="text">テキスト</option>
-                <option value="tag">タグ</option>
-            </select>
-            <button type="submit">検索</button>
-        </form>
-    </div>
+    // --- ログイン状態を取得 ---
+    const {data: {session}} = await supabaseClient.auth.getSession();
+
+    let navHTML = '';// ナビゲーション部分のHTML
+    
+    if(session && session.user) {
+        // 【ログインしている場合のナビゲーション】
+        const userName = session.user.user_metadata?.user_name || 'ゲスト';
+        navHTML = `
+            <a href="../../ログイン系/html/mypage.html">${escapeHTML(userName)}さん</a>
+            <a href="#" id="logout-button">ログアウト</a>
+        `;
+        
+    } else {
+        // 【ログインしていない場合のナビゲーション】
+        navHTML = `
+            <a href="../../ログイン系/html/login.html">ログイン</a>
+            <a href="../../ログイン系/html/signin.html">新規登録</a>
+        `;
+    }
+    
+    const headerHTML = `
+        <div class="header-logo">
+            <h1><a href="../../メイン系/html/index.html">スグリコ</a></h1>
+        </div>
+        <div class="header-nav-search">
+            <nav>
+                ${navHTML}
+            </nav>
+            <div class="search-form-container">
+                <form action="../../メイン系/html/search.html" method="get">
+                    <input type="text" name="keyword" placeholder="キーワード検索...">
+                    <select name="type">
+                        <option value="title">タイトル</option>
+                        <option value="text">テキスト</option>
+                        <option value="tag">タグ</option>
+                    </select>
+                    <button type="submit">検索</button>
+                </form>
+            </div>
+        </div>
     `;
 
     // 生成したHTMLをヘッダーコンテナに挿入
     headerContainer.innerHTML = headerHTML;
 
-    footerContainer.innerHTML = `<p>© 2025 スグリコ. All Rights Reserved.</p>`;
+    // フッターのHTMLを設定
+    footerContainer.innerHTML = `<p>&copy; 2025 スグリコ. All Rights Reserved.</p>`;
 
-    // もしログアウトボタンが存在すれば、イベントリスナーを設定
+    // --- ログアウトボタンのイベントリスナー設定 ---
     const logoutButton = document.getElementById('logout-button');
     if (logoutButton) {
         logoutButton.addEventListener('click', async (event) => {
             event.preventDefault();
             const { error } = await supabaseClient.auth.signOut();
             if (error) {
-                console.error('Logout Error:', error);
+                console.error('ログアウトエラー:', error.message);
+                alert('ログアウトに失敗しました。');
             } else {
-                // ログアウト成功後、ログインページに移動
-                window.location.href = '../../メイン系/html/index.html';
+                window.location.href = '../..//メイン系/html/index.html';
             }
         });
     }
@@ -105,4 +112,4 @@ function escapeHTML(str) {
 }
 
 // --- 関数の実行 ---
-setupHeader();
+setupHeaderAndFooter();

@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             
                             <div class="post-item-content">
                             <h3>${escapeHTML(post.title)} <small style="color:gray;">${timeAgoString}</small> </h3>
-                                <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
+                                <p>${escapeHTML(post.text.length > 20 ? post.text.slice(0, 20) + '...' : post.text).replace(/\n/g, '<br>')}</p>
                                 <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
                                 <br>
                                 <small style="color:gray;">${remainingTime}</small>

@@ -1,0 +1,67 @@
+/* --- ヘッダー --- */
+#header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+}
+
+.header-logo h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+.header-logo a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.header-nav-search {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+#header-container nav a {
+    margin-left: 15px;
+    font-weight: 500;
+}
+
+.search-form-container form {
+    display: flex;
+}
+.search-form-container input[type="text"] {
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+    padding: 8px;
+}
+.search-form-container select,
+.search-form-container button {
+    border: 1px solid #ccc;
+    border-left: none;
+    padding: 8px;
+    background-color: #f8f9fa;
+}
+.search-form-container button {
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+
+
+/* --- レスポンシブ設定 (画面幅が768px以下) --- */
+@media screen and (max-width: 768px) {
+    #header-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .header-nav-search {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        margin-top: 15px;
+        gap: 15px;
+    }
+}
