@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 const { data, error } = await supabaseClient
                     .from('forums')
-                    .select('*, users(user_name)')
+                    .select('*, users(user_name), forum_images(image_url)')
                     .in('forum_id', pagedForumIds)
                     .order('forum_id', { ascending: false });
 
@@ -88,10 +88,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .from('forums')
                 .select('*', { count: 'exact', head: true });
 
-            // Supabaseへのクエリを準備
+            // データを取得するためのクエリを準備
             let dataQuery = supabaseClient
                 .from('forums')
-                .select('*, users(user_name)');
+                .select('*, users(user_name), forum_images(image_url)')
 
             // もしキーワードが存在すれば、両方のクエリに.like()で検索条件を追加
             if (keyword) {
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // データ取得
             const { data, error } = await dataQuery
-                .select('*, users(user_name)')
+                .select('*, users(user_name), forum_images(image_url)')
                 .order('forum_id', { ascending: false })
                 .range(offset, offset + postsPerPage - 1);
 
@@ -142,6 +142,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     // -----------------------------
 
     function renderPostHTML(post) {
+        // 1. 画像サムネイルのHTMLを準備
+        let thumbnailHTML = '';
+        // もし画像があり、その配列が空でなければ
+        if (post.forum_images && post.forum_images.length > 0) {
+            // 1枚目の画像のURLを使ってimgタグを生成
+            thumbnailHTML = `<div class="post-item-thumbnail"><img src="${post.forum_images[0].image_url}" alt="投稿画像"></div>`;
+        }
+        
+        // 2. 閲覧期限のHTMLを準備 (ここは既存のロジックと同じ)
         let remainingTimeHTML = '';
         if (post.delete_date && new Date(post.delete_date) > new Date()) {
             remainingTimeHTML = `<small class="post-meta">閲覧期限: ${new Date(post.delete_date).toLocaleString()}</small>`;
@@ -149,14 +158,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             remainingTimeHTML = '<small class="post-meta">閲覧可能期間: 無期限</small>';
         }
 
+        // 3. 最終的なHTMLを組み立てる
         return `
             <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
-                <article class="post-item">
-                    <h3>${escapeHTML(post.title)}</h3>
-                    <p>${nl2br(post.text)}</p>
-                    <small class="post-meta">投稿者: ${escapeHTML(post.users?.user_name || '不明')}</small>
-                    <br>
-                    ${remainingTimeHTML}
+                <article class="post-item ${thumbnailHTML ? 'has-thumbnail' : ''}">
+                    ${thumbnailHTML}
+                    <div class="post-item-content">
+                        <h3>${escapeHTML(post.title)}</h3>
+                        <p>${nl2br(post.text)}</p>
+                        <small class="post-meta">投稿者: ${escapeHTML(post.users?.user_name || '不明')}</small>
+                        <br>
+                        ${remainingTimeHTML}
+                    </div>
                 </article>
             </a>
         `;
