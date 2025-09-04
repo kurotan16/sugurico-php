@@ -92,15 +92,15 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
                 return `
                     <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
                         <article class="post-item ${thumbnailHTML ? 'has-thumbnail' : ''}">
-                            ${thumbnailHTML}
+                            
                             <div class="post-item-content">
-                            <small style="color:gray;">${timeAgoString}</small>    
-                            <h3>${escapeHTML(post.title)}</h3>
-                                <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
+                            <h3>${escapeHTML(post.title)} <small style="color:gray;">${timeAgoString}</small> </h3>
+                                <p>${escapeHTML(post.text.length > 20 ? post.text.slice(0, 20) + '...' : post.text).replace(/\n/g, '<br>')}</p>
                                 <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
                                 <br>
                                 <small style="color:gray;">${remainingTime}</small>
                             </div>
+                            ${thumbnailHTML}
                         </article>
                     </a>
                 `;
