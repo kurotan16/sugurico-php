@@ -112,7 +112,12 @@ header nav  a {
 /* 各カラムのスタイル */
 .posts-column {
     flex: 1; /* コンテナ内で利用可能なスペースを均等に分け合う */
-    min-width: 0; /* 横幅が縮小できるようにするためのおまじない */
+    background-color: #f9f9f9;
+    padding: 15px;
+    width: 90%;
+    border-radius: 10px;
+    border: solid 1px #ddd;
+    margin: 0 10px;
 }
 
 /* --- レスポンシブ対応 (スマートフォンなど) --- */
@@ -120,6 +125,7 @@ header nav  a {
 @media (max-width: 768px) {
     .posts-container {
         flex-direction: column; /* 縦積みに変更 */
+        justify-content: center; /* 中央揃え */
         gap: 20px;
     }
 }
