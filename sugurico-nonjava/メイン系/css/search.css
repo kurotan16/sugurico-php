@@ -6,3 +6,19 @@
     padding-bottom: 0.5em;
     word-break: break-all;
 }
+main{
+height: 80vh;
+}
+
+.post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: scroll;
+    height: 80%;
+}
+
+.pagination {
+    text-align: center;
+    margin-top: 1em;
+}

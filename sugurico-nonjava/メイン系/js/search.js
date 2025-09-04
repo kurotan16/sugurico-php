@@ -97,8 +97,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // --- 5. 検索結果を描画 ---
-        searchCount.textContent = `${totalPosts}件の投稿が見つかりました。`;
+        
         if (posts.length > 0) {
+            searchCount.textContent = `${totalPosts}件の投稿が見つかりました。`;
             postsListContainer.innerHTML = posts.map(post => renderPostHTML(post)).join('');
         } else {
             postsListContainer.innerHTML = '<p>該当する投稿は見つかりませんでした。</p>';
@@ -128,15 +129,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `
                     <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
                         <article class="post-item ${thumbnailHTML ? 'has-thumbnail' : ''}">
-                            ${thumbnailHTML}
+                            
                             <div class="post-item-content">
-                            <small style="color:gray;">${timeAgoString}</small>    
-                            <h3>${escapeHTML(post.title)}</h3>
+                            <h3>${escapeHTML(post.title)} <small style="color:gray;">${timeAgoString}</small> </h3>
                                 <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
                                 <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
                                 <br>
                                 <small style="color:gray;">${remainingTime}</small>
                             </div>
+                            ${thumbnailHTML}
                         </article>
                     </a>
                 `;
@@ -154,6 +155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (currentPage > 1) {
             paginationHTML += `<a href="${baseLink}&page=${currentPage - 1}">« 前へ</a>`;
+            paginationHTML += ' ';
         }
 
         for (let i = 1; i <= totalPages; i++) {
@@ -162,9 +164,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 paginationHTML += `<a href="${baseLink}&page=${i}">${i}</a>`;
             }
+            paginationHTML += ' ';
         }
 
         if (currentPage < totalPages) {
+            paginationHTML += ' ';
             paginationHTML += `<a href="${baseLink}&page=${currentPage + 1}">次へ »</a>`;
         }
 
