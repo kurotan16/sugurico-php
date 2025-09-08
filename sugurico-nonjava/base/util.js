@@ -27,7 +27,7 @@ function timeAgo(utcDatestr) {
 function timeLeft(utcDatestr) {
     if(!utcDatestr) return '無期限';
     const deadline = new Date(utcDatestr);
-    const now = new Date();
+    const now = new Date() - 9*60*60*1000; // JSTに変換
     if(deadline <= now) return '';
 
     let diffInMs = deadline - now;
