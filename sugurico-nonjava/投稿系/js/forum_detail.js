@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', async () =>{
             <p class="post-meta">投稿者: ${escapeHTML(post.users.user_name)}</p>
             <p class="post-meta">投稿日時: ${timeAgoHTML}</p>
             <div class="post-images-container">${imagesHTML}</div>
-            <div class="post-content">${nl2br(escapeHTML(post.text))}</div>
+            <div class="post-content">${nl2br(post.text)}</div>
             <div class="post-tags">${tagsHTML}</div>
             ${remainingTimeHTML}
         `; 
