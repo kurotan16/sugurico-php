@@ -110,25 +110,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (post.forum_images && post.forum_images.length > 0) {
             thumbnailHTML = `<div class="post-item-thumbnail"><img src="${post.forum_images[0].image_url}" alt="投稿画像"></div>`;
         }
-        
-        let remainingTimeHTML = '';
-        if (post.delete_date && new Date(post.delete_date) > new Date()) {
-            remainingTimeHTML = `<small class="post-meta">閲覧期限: ${new Date(post.delete_date).toLocaleString()}</small>`;
-        } else if (!post.delete_date) {
-            remainingTimeHTML = '<small class="post-meta">閲覧可能期間: 無期限</small>';
-        }
+        const remainingTime = timeLeft(post.delete_date);
+        const timeAgoString = timeAgo(post.created_at);
 
         return `
             <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
                 <article class="post-item ${thumbnailHTML ? 'has-thumbnail' : ''}">
-                    ${thumbnailHTML}
+                    
                     <div class="post-item-content">
-                        <h3>${escapeHTML(post.title)}</h3>
-                        <p>${nl2br(post.text)}</p>
-                        <small class="post-meta">投稿者: ${escapeHTML(post.users?.user_name || '不明')}</small>
+                    <h3>${escapeHTML(post.title)} <small style="color:gray;">${timeAgoString}</small> </h3>
+                        <p>${nl2br(post.text.length > 20 ? post.text.slice(0, 20) + '...' : post.text).replace(/\n/g, '<br>')}</p>
+                        <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
                         <br>
-                        ${remainingTimeHTML}
+                        <small style="color:gray;">${remainingTime}</small>
                     </div>
+                    ${thumbnailHTML}
                 </article>
             </a>
         `;
