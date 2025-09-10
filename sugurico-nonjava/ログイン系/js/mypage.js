@@ -90,27 +90,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         paginationContainer.innerHTML = paginationHTML;
      }
 });
-
-/**
- * XSS対策のためのHTMLエスケープ関数
- */
-function escapeHTML(str) {
-    // もしstrがnullやundefinedなら、空文字列を返す
-    if (str === null || str === undefined) {
-        return '';
-    }
-    // 文字列でなければ、文字列に変換する
-    if (typeof str !== 'string') {
-        str = String(str);
-    }
-
-    return str.replace(/[&<>"']/g, function(match) {
-        return {
-            '&': '&',
-            '<': '<',
-            '>': '>',
-            '"': '"',
-            "'": "'"
-        }[match];
-    });
-}

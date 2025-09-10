@@ -90,12 +90,19 @@ document.addEventListener('DOMContentLoaded', async () =>{
             `<div class="post-image-wrapper"><img src="${image.image_url}" alt="投稿画像" class="post-image"></div>`
         ).join('');
 
+        let authorHTML = '';
+        const authorName = escapeHTML(post.users?.user_name || '不明');
+        if(currentUser&& post.user_id_auth !== currentUser.id){
+            authorHTML = `<a href="user_posts.html?id=${post.user_id_auth}">${authorName}</a>`;
+        } else {
+            authorHTML = authorName;
+        }
         postContainer.innerHTML = `
             <h1>${escapeHTML(post.title)}</h1>
-            <p class="post-meta">投稿者: ${escapeHTML(post.users.user_name)}</p>
+            <p class="post-meta">投稿者:${authorHTML} </p>
             <p class="post-meta">投稿日時: ${timeAgoHTML}</p>
             <div class="post-images-container">${imagesHTML}</div>
-            <div class="post-content">${nl2br(escapeHTML(post.text))}</div>
+            <div class="post-content">${nl2br(post.text)}</div>
             <div class="post-tags">${tagsHTML}</div>
             ${remainingTimeHTML}
         `; 
