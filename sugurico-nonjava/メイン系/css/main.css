@@ -114,23 +114,11 @@ header nav  a {
     flex: 1; /* コンテナ内で利用可能なスペースを均等に分け合う */
     background-color: #f9f9f9;
     padding: 15px;
-    width: 90%;
     border-radius: 10px;
     border: solid 1px #ddd;
     margin: 0 10px;
 }
-
-/* --- レスポンシブ対応 (スマートフォンなど) --- */
-/* 画面幅が768px以下になったら、横並びを解除して縦並びにします */
-@media (max-width: 768px) {
-    .posts-container {
-        flex-direction: column; /* 縦積みに変更 */
-        justify-content: center; /* 中央揃え */
-        gap: 20px;
-    }
-}
 /* --- index.html の投稿サムネイル用スタイル --- */
-
 /* 画像あり(has-thumbnail)の投稿アイテムをFlexboxに設定 */
 .post-item.has-thumbnail {
     display: flex;
@@ -157,4 +145,31 @@ header nav  a {
 /* テキストコンテンツ部分 */
 .post-item-content {
     flex-grow: 1; /* 残りのスペースをすべて使う */
+}
+
+/* --- レスポンシブ対応 (スマートフォンなど) --- */
+/* 画面幅が768px以下になったら、横並びを解除して縦並びにします */
+@media (max-width: 768px) {
+    .posts-container {
+        flex-direction: column; /* 縦積みに変更 */
+        justify-content: center; /* 中央揃え */
+        gap: 20px;
+    }
+
+    /* --- メインコンテンツ --- */
+    main {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    /* --- サムネイル付き投稿リスト --- */
+    .post-item.has-thumbnail {
+        flex-direction: column; /* サムネイルとテキストも縦積みに */
+        align-items: flex-start;
+    }
+
+    .post-item-thumbnail {
+        width: 100%; /* サムネイルの幅を100%に */
+        height: 180px; /* 高さを固定 */
+    }
 }
