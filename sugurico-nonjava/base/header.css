@@ -52,16 +52,42 @@
 
 /* --- レスポンシブ設定 (画面幅が768px以下) --- */
 @media screen and (max-width: 768px) {
+    /* --- ヘッダー --- */
+    header {
+        flex-direction: column; /* 要素を縦積みに変更 */
+        gap: 15px; /* 各要素の間の隙間 */
+        padding: 1rem;
+    }
+
+    header nav a {
+        margin: 0 10px; /* 左右の余白を調整 */
+    }
+
+    /* --- 検索フォーム --- */
+    .search-form-container form {
+        display: flex;
+        flex-direction: column; /* 検索フォーム内の要素も縦積みに */
+        gap: 8px;
+        width: 100%;
+    }
+
     #header-container {
         flex-direction: column;
-        align-items: flex-start;
+        /* align-items: flex-start; */
     }
 
     .header-nav-search {
         flex-direction: column;
-        align-items: flex-start;
+        /* align-items: flex-start; */
         width: 100%;
         margin-top: 15px;
         gap: 15px;
+    }
+
+    .search-form-container select, .search-form-container button {
+        border: 1px solid #ccc;
+        /* border-left: none; */
+        padding: 8px;
+        background-color: #f8f9fa;
     }
 }

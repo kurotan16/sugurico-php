@@ -10,102 +10,89 @@ document.addEventListener('DOMContentLoaded', async () => {
     const paginationContainer = document.getElementById('pagination-container');
 
     const urlParams = new URLSearchParams(window.location.search);
-    const keyword = urlParams.get('keyword') || '';
+    const keyword = urlParams.get('keyword')?.trim() || '';
     const type = urlParams.get('type') || 'title';
     let currentPage = parseInt(urlParams.get('page')) || 1;
 
-    /*if (!keyword.trim()) {
-        searchTitle.textContent = '検索キーワードが入力されていません。';
-        postsListContainer.innerHTML = '';
-        return;
-    }*/
+    if (!keyword) {
+        searchTitle.textContent = 'すべての投稿';
+    } else {
+        searchTitle.textContent = `「${escapeHTML(keyword)}」の検索結果(${type})`;
+    }
 
-    searchTitle.textContent = `「${escapeHTML(keyword)}」の検索結果(${type})`;
-
-   try {
+    try {
         const postsPerPage = 10;
-        const visibilityFilter = 'delete_date.is.null,delete_date.gt.now()';
-
         let totalPosts = 0;
-        let pagedForumIds = [];
+        let posts = [];
 
-        // --- 2. 検索タイプに応じて、表示すべき投稿IDのリストを取得 ---
-        if (type === 'tag') {
-            // 【タグ検索】
-            // a. タグ名で、条件に合う "tag" テーブルの行を取得
-            const { data: tagLinks, error: tagError } = await supabaseClient
-                .from('tag')
-                .select('forum_id, tag_dic!inner(tag_name)')
-                .like('tag_dic.tag_name', `%${keyword}%`);
+        if (keyword && type === 'tag') {
+            // --- ▼▼▼ タグ検索のロジック ▼▼▼ ---
+            // ① キーワードに一致するタグを`tag_dic`から検索し、関連する投稿ID(`forum_id`)を取得
+            const { data: tags, error: tagError } = await supabaseClient
+                .from('tag_dic')
+                .select('tag!inner(forum_id)')
+                .like('tag_name', `%${keyword}%`);
 
             if (tagError) throw tagError;
-            console.log("タグ検索で取得したtagLinks:", tagLinks); // デバッグ用ログ
-            
-            const matchedForumIds = [...new Set(tagLinks.map(t => t.forum_id))];
 
-            // b. 取得した投稿IDの中から、さらに公開期限が有効なものを絞り込む
-            if (matchedForumIds.length > 0) {
-                const { data: visibleForums, error: forumError } = await supabaseClient
+            // ② 取得したデータから、重複を除いたforum_idの配列を作成
+            const allForumIds = [...new Set(tags.flatMap(t => t.tag.map(item => item.forum_id)))];
+            
+            totalPosts = allForumIds.length;
+
+            if (totalPosts > 0) {
+                const offset = (currentPage - 1) * postsPerPage;
+                const pagedForumIds = allForumIds.slice(offset, offset + postsPerPage);
+
+                // ③ 抜き出したforum_idを使って、最終的に表示する投稿データを取得
+                const { data, error } = await supabaseClient
                     .from('forums')
-                    .select('forum_id')
-                    .in('forum_id', matchedForumIds)
-                    .or(visibilityFilter);
-                
-                if (forumError) throw forumError;
-                console.log("公開期限が有効な投稿:", visibleForums); // デバッグ用ログ
+                    .select('*, users(user_name), forum_images(image_url)')
+                    .in('forum_id', pagedForumIds)
+                    .order('forum_id', { ascending: false });
 
-                const finalForumIds = visibleForums.map(f => f.forum_id);
-                totalPosts = finalForumIds.length;
-                
-                // c. ページネーションのためにIDを切り出す
-                const offset = (currentPage - 1) * postsPerPage;
-                pagedForumIds = finalForumIds.slice(offset, offset + postsPerPage);
+                if (error) throw error;
+                posts = data;
             }
-
         } else {
-            // 【タイトル or 本文検索】
+            // --- ▼▼▼ キーワードが空、またはタイトル/テキスト検索のロジック ▼▼▼ ---
             const column = (type === 'text') ? 'text' : 'title';
-            // a. まず総件数を取得
-            const { count, error: countError } = await supabaseClient
+            const offset = (currentPage - 1) * postsPerPage;
+
+            let countQuery = supabaseClient
                 .from('forums')
-                .select('*', { count: 'exact', head: true })
-                .like(column, `%${keyword}%`)
-                .or(visibilityFilter);
-            
-            if (countError) throw countError;
-            totalPosts = count ?? 0;
-        }
+                .select('*', { count: 'exact', head: true });
 
-        // --- 3. 投稿データを取得 ---
-        let posts = [];
-        if ((type === 'tag' && pagedForumIds.length > 0) || (type !== 'tag' && totalPosts > 0)) {
-            let query = supabaseClient.from('forums').select('*, users(user_name),forum_images ( image_url ) ');
+            let dataQuery = supabaseClient
+                .from('forums')
+                .select('*, users(user_name), forum_images(image_url)');
 
-            if (type === 'tag') {
-                query = query.in('forum_id', pagedForumIds);
-            } else {
-                const column = (type === 'text') ? 'text' : 'title';
-                const offset = (currentPage - 1) * postsPerPage;
-                query = query.like(column, `%${keyword}%`)
-                             .or(visibilityFilter)
-                             .range(offset, offset + postsPerPage - 1);
+            if (keyword) {
+                countQuery = countQuery.like(column, `%${keyword}%`);
+                dataQuery = dataQuery.like(column, `%${keyword}%`);
             }
             
-            const { data, error } = await query.order('forum_id', { ascending: false });
+            const { count: totalCount, error: countError } = await countQuery;
+
+            if (countError) throw countError;
+            totalPosts = totalCount ?? 0;
+
+            const { data, error } = await dataQuery
+                .order('forum_id', { ascending: false })
+                .range(offset, offset + postsPerPage - 1);
+
             if (error) throw error;
             posts = data;
         }
 
-        // --- 5. 検索結果を描画 ---
-        
+        searchCount.textContent = `${totalPosts}件の投稿が見つかりました。`;
+
         if (posts.length > 0) {
-            searchCount.textContent = `${totalPosts}件の投稿が見つかりました。`;
             postsListContainer.innerHTML = posts.map(post => renderPostHTML(post)).join('');
         } else {
             postsListContainer.innerHTML = '<p>該当する投稿は見つかりませんでした。</p>';
         }
 
-        // --- 6. ページネーションを描画 ---
         renderPagination(totalPosts, currentPage, postsPerPage, keyword, type);
 
     } catch (error) {
@@ -115,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // -----------------------------
-    // ヘルパー関数
+    // ヘルパー関数 (変更なし)
     // -----------------------------
 
     function renderPostHTML(post) {
@@ -155,7 +142,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (currentPage > 1) {
             paginationHTML += `<a href="${baseLink}&page=${currentPage - 1}">« 前へ</a>`;
-            paginationHTML += ' ';
         }
 
         for (let i = 1; i <= totalPages; i++) {
@@ -164,16 +150,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 paginationHTML += `<a href="${baseLink}&page=${i}">${i}</a>`;
             }
-            paginationHTML += ' ';
         }
 
         if (currentPage < totalPages) {
-            paginationHTML += ' ';
             paginationHTML += `<a href="${baseLink}&page=${currentPage + 1}">次へ »</a>`;
         }
 
         paginationContainer.innerHTML = paginationHTML;
     }
 
+    function escapeHTML(str) {
+        if (!str) return '';
+        return str.toString().replace(/[&<>"']/g, m => ( {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        })[m]);
+    }
+
+    function nl2br(str) {
+        return escapeHTML(str).replace(/\r\n|\n\r|\r|\n/g, '<br>');
+    }
 
 });
+
