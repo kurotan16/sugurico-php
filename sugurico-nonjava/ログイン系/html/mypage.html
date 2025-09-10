@@ -17,7 +17,25 @@
             </h2>
             <p>
                 <a href="update.html">登録情報を変更する</a>
+                <button type="button" id="toggle-search-button">詳細検索</button>
             </p>
+            <div id="advanced-search-form" class="advanced-search-container" style="display:none;">
+                <input type="text" id="search-keyword" placeholder="キーワードを入力">
+                <select id="period-select">
+                    <option value="all">指定なし</option>
+                    <option value="3days">24時間以内</option>
+                    <option value="1week">1週間以内</option>
+                    <option value="1month">1ヶ月以内</option>
+                </select>
+                <select id="sort-select">
+                    <optinon value="desc">新しい順</option>
+                    <optinon value="asc">古い順</option>
+                </select>
+                <select id="tag-select">
+                    <option value="all">すべてのカテゴリ</option>
+                </select>
+            <button type="button" id="filter-button">絞り込み</button>
+        </div>
             <hr>
             <!-- 投稿一覧を表示するエリア -->
             <div id="my-posts-list" class="post-list">
