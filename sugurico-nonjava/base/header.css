@@ -73,14 +73,21 @@
 
     #header-container {
         flex-direction: column;
-        align-items: flex-start;
+        /* align-items: flex-start; */
     }
 
     .header-nav-search {
         flex-direction: column;
-        align-items: flex-start;
+        /* align-items: flex-start; */
         width: 100%;
         margin-top: 15px;
         gap: 15px;
+    }
+
+    .search-form-container select, .search-form-container button {
+        border: 1px solid #ccc;
+        /* border-left: none; */
+        padding: 8px;
+        background-color: #f8f9fa;
     }
 }
