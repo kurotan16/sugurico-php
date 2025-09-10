@@ -1,12 +1,19 @@
 /* --- ヘッダー --- */
-#header-container {
+
+header {
+    background-color: #fff;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #eee;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 30px;
-    background-color: #fff;
-    border-bottom: 1px solid #e0e0e0;
-    flex-wrap: wrap;
+    gap: 20px; /* 要素間の最小の隙間を確保 */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    flex-shrink: 0; /* h1が縮まないようにする */
 }
 
 .header-logo h1 {
@@ -24,28 +31,46 @@
     gap: 20px;
 }
 
+#header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: #fff;
+    border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+}
+
 #header-container nav a {
     margin-left: 15px;
     font-weight: 500;
 }
 
+.search-form-container {
+    flex-grow: 1; /* ★これが最重要！空きスペースを埋めるように伸びる */
+    max-width: 600px; /* あまりにも伸びすぎないように最大幅を指定 */
+}
+
 .search-form-container form {
     display: flex;
+    width: 100%;
 }
 .search-form-container input[type="text"] {
-    border: 1px solid #ccc;
-    border-radius: 4px 0 0 4px;
+    width: 100%; /* 親要素(form)の幅いっぱいに広がる */
     padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px; /* 左側だけ角丸に */
 }
 .search-form-container select,
 .search-form-container button {
-    border: 1px solid #ccc;
-    border-left: none;
     padding: 8px;
+    border: 1px solid #ccc;
+    border-left: none; /* 左の境界線を消して繋がって見えるように */
     background-color: #f8f9fa;
+    flex-shrink: 0; /* selectとbuttonが縮まないように */
 }
 .search-form-container button {
-    border-radius: 0 4px 4px 0;
+    border-radius: 0 4px 4px 0; /* 右側だけ角丸に */
     cursor: pointer;
 }
 
@@ -59,8 +84,17 @@
         padding: 1rem;
     }
 
+    header nav {
+        order: -1; /* nav要素(ログイン情報)を一番上に表示させる */
+    }
+
     header nav a {
         margin: 0 10px; /* 左右の余白を調整 */
+    }
+
+    .search-form-container {
+        max-width: none; /* PC用の最大幅指定を解除 */
+        width: 100%;     /* 親要素(header)いっぱいに広がるように */
     }
 
     /* --- 検索フォーム --- */
@@ -84,10 +118,10 @@
         gap: 15px;
     }
 
-    .search-form-container select, .search-form-container button {
-        border: 1px solid #ccc;
-        /* border-left: none; */
-        padding: 8px;
-        background-color: #f8f9fa;
+    .search-form-container input[type="text"],
+    .search-form-container select,
+    .search-form-container button {
+        border-radius: 4px; /* すべての角を角丸に */
+        border-left: 1px solid #ccc; /* 境界線を元に戻す */
     }
 }

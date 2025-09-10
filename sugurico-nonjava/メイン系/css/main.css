@@ -144,10 +144,14 @@ header nav  a {
 @media (max-width: 768px) {
     .posts-container {
         display: flex;
-        align-items: unset; /* コンテンツの高さが違っても上端を揃える */
+        align-items: unset; /* align-itemsを解除 */
         flex-direction: column; /* 縦積みに変更 */
         justify-content: center; /* 中央揃え */
         gap: 20px;
+    }
+
+    h1 {
+        text-align-last: center;
     }
 
     /* --- メインコンテンツ --- */
