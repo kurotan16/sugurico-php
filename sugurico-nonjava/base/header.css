@@ -56,7 +56,6 @@ header h1 {
     width: 100%;
 }
 .search-form-container input[type="text"] {
-    width: 100%; /* 親要素(form)の幅いっぱいに広がる */
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px 0 0 4px; /* 左側だけ角丸に */
