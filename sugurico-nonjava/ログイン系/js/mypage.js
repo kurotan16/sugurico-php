@@ -1,5 +1,7 @@
 // mypage.js
 
+'use strict';
+
 document.addEventListener('DOMContentLoaded', () => {
 
     // --- HTML要素の取得 ---
