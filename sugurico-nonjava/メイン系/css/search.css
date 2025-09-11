@@ -6,8 +6,15 @@
     padding-bottom: 0.5em;
     word-break: break-all;
 }
+
 main{
-height: 80vh;
+    max-width: 800px;
+    height: 80vh;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 .post-list {

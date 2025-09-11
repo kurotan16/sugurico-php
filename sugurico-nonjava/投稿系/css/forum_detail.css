@@ -141,3 +141,28 @@ main{
     font-size: 0.8em;
     color: #888;
 }
+
+/* --- レスポンシブ設定 (画面幅が768px以下) --- */
+@media (max-width: 768px) {
+
+    /* --- メインコンテンツ --- */
+    main {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    .post-detail h1 {
+        font-size: 1.5em; /* タイトルの文字サイズを少し小さく */
+    }
+
+    /* --- 投稿画像 --- */
+    .post-images-container {
+        justify-content: center; /* 画像を中央揃えに */
+    }
+
+    .post-image-wrapper {
+        width: calc(50% - 5px); /* 2カラムで表示されるように調整 */
+        height: auto;
+        aspect-ratio: 1 / 1; /* 正方形を保つ */
+    }
+}
