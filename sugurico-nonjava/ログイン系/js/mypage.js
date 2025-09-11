@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //  ページの初期化を行うメイン関数
     async function initializePage() {
         //  1. ログイン状態とユーザー情報を取得
-        const  {data:{session}} = await supabase.auth.getSession();
+        const  {data:{session}} = await supabaseClient.auth.getSession();
         if (!session) {
             window.location.href = 'login.html'; // ログインページへリダイレクト
             return;
@@ -37,10 +37,6 @@ document.addEventListener('DOMContentLoaded', () => {
         //  3. URLのパラメータを読み込んで、初期表示を行う
         const urlParams = new URLSearchParams(window.location.search);
         const page = parseInt(urlParams.get('page')) || 1;
-        const keyword = urlParams.get('keyword') || '';
-        const period = urlParams.get('period') || 'all';
-        const sort = urlParams.get('sort') || 'newest';
-        const tag = urlParams.get('tag') || '';
         await fetchAndDisplayUserPosts(page);
 
         // --- 4. イベントリスナーを設定 ---
@@ -64,7 +60,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //  ユーザーの投稿を取得し、表示する関数
     async function populateUserTags() {
-        //  (タグ取得用のDB関数 "get_user_tags" が必要)
+        try {
+            //  SupabaseのRPCで、作成したDB関数 "get_user_tags" を呼び出す
+            const {data: tags, error} = await supabaseClient.
+                                        rpc(
+                                            'get_user_tags', {
+                                                user_id_param: currentUser.id   //  関数の引数に、ログイン中のユーザーIDを渡す
+                                            }
+                                        );
+
+            if(error) throw error;
+
+            //  <select>の中身を一度クリアし、「すべてのタグ」を先頭に追加
+            tagSelect.innerHTML = '<option value="">すべてのタグ</option>'
+            
+            if (tags && tags.length > 0) {
+                tags.forEach(tag => {
+                    const option = document.createElement('option');
+                    option.value = tag.tag_id;  //  valueにはIDを設定
+                    option.textContent = tag.tag_name;  //  表示はタグ名
+                    tagSelect.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.error('ユーザーのタグリスト取得に失敗:',error);
+            // エラー時でも最低限の選択肢を表示
+            tagSelect.innerHTML = '<option value="">すべてのタグ</option>';
+        }
     }
 
     //  絞り込み条件に基づいてユーザーの投稿を取得・表示するメイン関数
@@ -73,53 +95,31 @@ document.addEventListener('DOMContentLoaded', () => {
         paginationContainer.innerHTML = '';
 
         try {
-            const postsPerPage = 10; // 1ページあたりの投稿数
+            const postsPerPage = 10;
 
-            //  クエリの組み立て
-            let query = supabaseClient
-                        .from('forums')
-                        .select('*, users!inner(user_name)',{ count: 'exact' })
-            // 自分の投稿に限定
-            query = query.eq('user_id_auth', currentUser.id);
-            
-            // キーワード絞り込み
-            if(keywordInput.value.trim() !== '') {
-                query = query.or(`title.like.%${keywordInput.value}%,text.like.%${keywordInput.value}%`);
-            }
-
-            //  期間フィルター
-            if(periodSelect.value !== 'all') {
-                const date = new Date();
-                if(periodSelect.value === '3days') date.setDate(date.getDate() - 3);
-                if(periodSelect.value === '1week') date.setDate(date.getDate() - 7);
-                if(periodSelect.value === '1month') date.setMonth(date.getMonth() - 1);
-                //  if(periodSelect.value === '3months') date.setMonth(date.getMonth() - 3);
-                query = query.gte('created_at', date.toISOString());
-            }
-
-            //  タグフィルター
-            if(tagSelect.value !== '') {
-                // (タグ絞り込み用のJOINロジックが必要)
-            }
-
-            //  ソート順
-            const sortOrder = sortSelect.value === 'asc';
-            query = query.order('created_at', { ascending: sortOrder });
-
-            //  ページネーション
-            const offset = (page - 1) * postsPerPage;
-            const {data: posts, count: totalPosts, error} = await query.range(offset, offset + postPerPage - 1);
-
+            const {data, error, count} = await supabaseClient.rpc('filter_user_posts',{
+                user_id_param: currentUser.id,
+                keyword_param: keywordInput.value.trim(),
+                period_param: periodSelect.value,
+                tag_id_param: tagSelect.value ? parseInt(tagSelect.value) : null,
+                sort_order_param: sortSelect.value,
+                page_param: page,
+                limit_param: postsPerPage
+            },{
+                count: 'exact'
+            });
             if (error) throw error;
+            console.log(data);
 
-            //  投稿の表示
-            if (posts.length === 0) {
-                postsListContainer.innerHTML = '<p>投稿が見つかりません。</p>';
+            const posts = data;
+            const totalPosts = count ?? 0;
+
+            if (posts && posts.length > 0) {
+                postsListContainer.innerHTML = posts.map(post => renderPostHTML(post)).join('');
             } else {
-                postsListContainer.innerHTML = posts.map(post =>renderPostHTML(post)).join('');
+                postsListContainer.innerHTML = '<p>該当する投稿はありません。</p>';
             }
-
-            renderPagination(totalPosts ?? 0, page, postsPerPage);
+            renderPagination(totalPosts,page,postsPerPage)
         } catch (error) {
             console.error('投稿の取得に失敗:', error);
             postsListContainer.innerHTML = `<p>投稿の取得中にエラーが発生しました。:${error.message}</p>`;
