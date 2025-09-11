@@ -55,20 +55,19 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         //  6. 投稿リストの表示
         if(posts.length > 0){
-        postsListContainer.innerHTML = posts.map(post =>`
-            <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}">
+            postsListContainer.innerHTML = posts.map(post =>`
+                <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}">
                 <article class="post-item">
-                    <h3>${escapeHTML(post.title)}</h3>
-                    <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
+                <h3>${escapeHTML(post.title)}</h3>
+                <p>${escapeHTML(post.text).replace(/\n/g, '<br>')}</p>
                 </article>
-            </a>
-        `).join('');
-    } else {
-        postsListContainer.innerHTML = `<p>まだ投稿がありません。</p>`;
-    }
-    //  7. ページネーションのリンクを表示
-    renderPagination(totalPosts ?? 0, currentPage, postsPerPage, targetUserId);
-
+                </a>
+            `).join('');
+        } else {
+            postsListContainer.innerHTML = `<p>まだ投稿がありません。</p>`;
+        }
+        //  7. ページネーションのリンクを表示
+        renderPagination(totalPosts ?? 0, currentPage, postsPerPage, targetUserId);
     } catch (error) {
         pageTitle.textContent = 'エラー';
         postsListContainer.innerHTML = `<p>データの取得中にエラーが発生しました: ${error.message}</p>`;
