@@ -75,3 +75,63 @@ header nav  a {
     margin: 0;
     margin-bottom: 10px;
 }
+
+/* --- 詳細検索フォーム --- */
+.advanced-search-container {
+    padding: 20px;
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    margin-bottom: 20px;
+
+    /* PC表示 (デフォルト): Flexboxで横1列に */
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* 各検索アイテム */
+.search-item{
+    display: flex;
+    flex-direction: column; /* ラベルと入力欄を縦に並べる */
+}
+
+.search-item label {
+    font-size: 12px;
+    margin-bottom: 4px;
+    color: #555;
+}
+
+.search-item input,
+.search-item select {
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* キーワード入力欄だけ幅を広げる */
+.search-item-keyword {
+    flex-grow: 1; /* 残りのスペースをすべて使う */
+}
+
+/* ボタンの縦位置を調整 */
+.search-item-button {
+    align-self: flex-end; /* 自分だけ一番下に揃える */
+}
+
+/* スマホ表示 (768px以下) */
+
+@media screen and (max-width: 768px) {
+    .advanced-search-container {
+        flex-wrap: wrap;
+    }
+
+    .search-item {
+        width: calc(50% - 10px);
+    }
+
+    .search-item-keyword {
+        width: 100%;
+    }
+}
