@@ -97,7 +97,23 @@ document.addEventListener('DOMContentLoaded', async () =>{
         } else {
             authorHTML = authorName;
         }
+
+        // ★ isOwner 変数を関数の中から見えるように取得
+        const isOwner = currentUser && post.user_id_auth === currentUser.id;
+
+        // ★ 編集・削除ボタン用のHTMLを生成
+        let ownerButtonsHTML = '';
+        if (isOwner) {
+            ownerButtonsHTML = `
+                <div class="post-owner-actions">
+                    <a href="forum_input.html?edit_id=${post.forum_id}" class="edit-button">編集</a>
+                    <button type="button" id="delete-post-button" class="delete-button">削除</button>
+                </div>
+            `;
+        }
+
         postContainer.innerHTML = `
+            ${ownerButtonsHTML} <!-- ★ ここにボタンを追加 -->
             <h1>${escapeHTML(post.title)}</h1>
             <p class="post-meta">投稿者:${authorHTML} </p>
             <p class="post-meta">投稿日時: ${timeAgoHTML}</p>
@@ -106,6 +122,45 @@ document.addEventListener('DOMContentLoaded', async () =>{
             <div class="post-tags">${tagsHTML}</div>
             ${remainingTimeHTML}
         `; 
+
+        // 削除ボタンにイベントリスナーを設定
+        if (isOwner) {
+            document.getElementById('delete-post-button').addEventListener('click', () => {
+                // 削除処理
+                /**
+                 * 投稿を削除する関数
+                 * @param {number} forumId - 削除する投稿のID
+                 */
+                async function handleDeletePost(forumId) {
+                    // ユーザーに最終確認
+                    if (!confirm('この投稿を本当に削除しますか？\nこの操作は元に戻せません。')) {
+                        return; // キャンセルされたら何もしない
+                    }
+
+                    try {
+                        // ★ SupabaseのRPCで、削除用のデータベース関数を呼び出す
+                        //    (この方が、関連データをまとめて削除できて安全)
+                        const { error } = await supabaseClient.rpc('delete_forum_with_related_data', {
+                            forum_id_param: forumId
+                        });
+
+                        if (error) {
+                            // 削除中にDBエラーが発生した場合
+                            throw error;
+                        }
+
+                        // 削除成功
+                        alert('投稿を削除しました。');
+                        window.location.href = '../../メイン系/html/index.html'; // ホームページにリダイレクト
+
+                    } catch (error) {
+                        console.error('削除エラー:', error);
+                        alert(`投稿の削除に失敗しました: ${error.message}`);
+                    }
+                }
+                handleDeletePost(post.forum_id);
+            });
+        }
     }
 
     /**
