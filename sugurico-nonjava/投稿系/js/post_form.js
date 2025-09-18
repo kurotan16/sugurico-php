@@ -95,12 +95,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /**
-     * 【更新処理】を行う関数 (次のステップで実装)
+     * 【更新処理】を行う関数
+     * @param {number} forumId - 更新する投稿のID
      */
     async function handleUpdatePost(forumId) {
-        // ここに更新処理を書いていきます
-        console.log("更新処理を開始します for forum ID:", forumId);
-        // (今は何もしない)
+        // --- 1. まず、投稿本体（タイトル、本文など）を更新 ---
+        const { error: forumUpdateError } = await supabaseClient
+            .from('forums')
+            .update({
+                title: titleInput.value,
+                text: textInput.value,
+                delete_date: calculateDeleteDate(expireSelect.value)
+            })
+            .eq('forum_id', forumId);
+
+        if (forumUpdateError) throw forumUpdateError;
+
+        // --- 2. タグの更新 ---
+        const { error: tagDeleteError } = await supabaseClient
+            .from('tag')
+            .delete()
+            .eq('forum_id', forumId);
+        if (tagDeleteError) throw tagDeleteError;
+        
+        const tags = getTagsFromForm();
+        if (tags.length > 0) {
+            await saveTags(forumId, tags);
+        }
+
+        // --- 3. 画像の更新 ---
+        const imageInputs = imageInputContainer.querySelectorAll('.image-input');
+        const filesToUpload = [];
+        imageInputs.forEach(input => { if (input.files[0]) filesToUpload.push(input.files[0]); });
+
+        if (filesToUpload.length > 0) {
+            const { error: storageError } = await supabaseClient.rpc('delete_post_images', { forum_id_param: forumId });
+            if (storageError) throw storageError;
+
+            const { error: imageDbError } = await supabaseClient
+                .from('forum_images')
+                .delete()
+                .eq('post_id', forumId);
+            if (imageDbError) throw imageDbError;
+
+            const newImageUrls = await uploadImages(filesToUpload, user.id);
+
+            if (newImageUrls.length > 0) {
+                await saveImageUrls(forumId, newImageUrls);
+            }
+        }
     }
 
     /**
