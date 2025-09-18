@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 postsListContainer.innerHTML = '<p>該当する投稿はありません。</p>';
             }
-            renderPagination(totalPosts,page,postsPerPage)
+            renderPagination(totalPosts,page,postsPerPage);
         } catch (error) {
             console.error('投稿の取得に失敗:', error);
             postsListContainer.innerHTML = `<p>投稿の取得中にエラーが発生しました。:${error.message}</p>`;
