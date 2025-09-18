@@ -129,14 +129,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderPostHTML(post) {
-        return `
+        // 投稿アイテムのHTML
+        const postHTML = `
             <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}">
-                <article class="post-item">
-                    <h3>${escapeHTML(post.title)}</h3>
-                    <p>${nl2br(post.text)}</p>
-                </article>
+                <h3>${escapeHTML(post.title)}</h3>
+                <p>${nl2br(post.text)}</p>
             </a>
         `;
+
+        // 編集・削除ボタンのHTML
+        const actionsHTML = `
+            <div class="post-item-actions">
+                <a href="../../投稿系/html/forum_input.html?edit_id=${post.forum_id}" class="edit-link">編集</a>
+                <button type="button" class="delete-button" data-post-id="${post.forum_id}">削除</button>
+            </div>
+        `;
+
+        // 2つを組み合わせて最終的なHTMLを生成
+        return `
+            <article class="post-item">
+                <div class="post-item-main">${postHTML}</div>
+                ${actionsHTML}
+            </article>
+        `
     }
 
     function renderPagination(totalItems, currentPage, itemsPerPage) {
