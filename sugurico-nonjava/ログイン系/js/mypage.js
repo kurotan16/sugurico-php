@@ -58,6 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
         filterButton.addEventListener('click',  () => {
             fetchAndDisplayUserPosts(1); // 1ページ目から表示      
         });
+
+        // 投稿リスト全体に対してイベントリスナーを設定 (イベント移譲)
+        postsListContainer.addEventListener('click', async (event) => {
+            // クリックされたのが削除ボタン(.delete-button)の場合のみ処理
+            if (event.target.classList.contains('delete-button')) {
+                const postId = event.target.dataset.postId; // data-post-id属性からIDを取得
+                await handleDeletePost(postId);
+            }
+        });
     }
 
     //  ユーザーの投稿を取得し、表示する関数
@@ -137,19 +146,19 @@ document.addEventListener('DOMContentLoaded', () => {
             </a>
         `;
 
-        // 編集・削除ボタンのHTML
-        const actionsHTML = `
+        // 編集・削除ボタン部分
+        const postActionsHTML = `
             <div class="post-item-actions">
-                <a href="../../投稿系/html/forum_input.html?edit_id=${post.forum_id}" class="edit-link">編集</a>
-                <button type="button" class="delete-button" data-post-id="${post.forum_id}">削除</button>
+                <a href="../../投稿系/html/forum_input.html?edit_id=${post.forum_id}" class="action-button edit-button">編集</a>
+                <button type="button" class="action-button delete-button" data-post-id="${post.forum_id}">削除</button>
             </div>
         `;
 
-        // 2つを組み合わせて最終的なHTMLを生成
+                // 2つを組み合わせて最終的なHTMLを生成
         return `
             <article class="post-item">
                 <div class="post-item-main">${postHTML}</div>
-                ${actionsHTML}
+                ${postActionsHTML}
             </article>
         `
     }
@@ -190,5 +199,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         paginationContainer.innerHTML = paginationHTML;
     }
+    /**
+     * 投稿を削除し、UIを更新する関数
+     * @param {number} postId - 削除する投稿のID
+     */
+    async function handleDeletePost(postId) {
+        if (!confirm('この投稿を本当に削除しますか？')) {
+            return;
+        }
+
+        try {
+            // forum_detail.js と同じRPCを呼び出して安全に削除
+            const { error } = await supabaseClient.rpc('delete_forum_with_related_data', {
+                forum_id_param: postId
+            });
+
+            if (error) throw error;
+
+            // 削除成功
+            alert('投稿を削除しました。');
+            
+            // ★ページをリロードするのではなく、表示を更新する
+            // 現在のページ番号を取得
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentPage = parseInt(urlParams.get('page')) || 1;
+            // 投稿リストを再読み込み
+            await fetchAndDisplayUserPosts(currentPage);
+
+        } catch (error) {
+            console.error('削除エラー:', error);
+            alert(`投稿の削除に失敗しました: ${error.message}`);
+        }
+    }
+
     initializePage();
 });
