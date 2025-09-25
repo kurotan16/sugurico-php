@@ -44,23 +44,24 @@
                     <!-- プレミアム機能は後でJSで表示制御 -->
                 </div>
                 <!-- 画像添付 -->
-                 <div class="form-group">
+                <div class="form-group">
                     <label>画像 (最大<span id="max-images-count">3</span>枚まで)</label>
                     
-                    <!-- 画像入力欄を管理するコンテナ -->
-                    <div id="image-input-container">
-                        <div class="image-input-wrapper">
-                            <input type="file" name="images[]" class="image-input" accept="image/*">
+                    <!-- 画像プレビューと入力ボタンがここに入るコンテナ -->
+                    <div id="image-upload-container">
+                        <!-- 既存のプレビュー画像がJSによってここに追加される -->
+
+                        <!-- 新しい画像を追加するためのボタン(最初はこれだけ表示) -->
+                        <div id="add-image-button-wrapper">
+                            <label for="image-input-1" class="add-image-button">+</label>
                         </div>
                     </div>
-                    <!-- 操作ボタン -->
-                    <div class="image-buttons" style="margin-top: 10px;">
-                        <button type="button" id="add-image-button" class="insert-button">画像を追加</button>
-                        <button type="button" id="remove-image-button" class="delete-button">最後の画像を削除</button>
+                    
+                    <!-- ファイル入力欄は非表示にして裏で管理する -->
+                    <div id="image-input-hidden-container" style="display: none;">
+                        <input type="file" id="image-input-1" class="image-input" accept="image/*">
                     </div>
-                    <!-- 画像プレビューを表示するエリア -->
-                    <div id="image-preview-container"></div>
-                 </div>
+                </div>
 
                 
                 <!-- タグ -->
