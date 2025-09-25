@@ -198,6 +198,21 @@ main {
     justify-content: space-between;
     margin-bottom: 8px;
 }
+/* サムネイル画像のコンテナ */
+.post-item-thumbnail {
+    flex-shrink: 0; /* コンテナが縮まないようにする */
+    width: 120px;   /* サムネイルの横幅 */
+    height: 90px;   /* サムネイルの高さ */
+    border-radius: 4px;
+    overflow: hidden; /* はみ出した画像を隠す */
+}
+
+/* サムネイル画像そのもの */
+.post-item-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 画像の比率を保ったまま、コンテナ全体を覆うように調整 */
+}
 
 /* --- ページネーション --- */
 .pagination {
