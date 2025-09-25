@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         // --- 3. 画像の更新 ---
-        const imageInputs = imageInputContainer.querySelectorAll('.image-input');
+        const imageInputs = document.querySelectorAll('#image-input-hidden-container .image-input');
         const filesToUpload = [];
         imageInputs.forEach(input => { if (input.files[0]) filesToUpload.push(input.files[0]); });
 
@@ -188,7 +188,7 @@ document.addEventListener('DOMContentLoaded', async () => {
      * フォームからすべての画像ファイルを取得し、アップロードする
      */
     async function uploadAllImages(userId) {
-        const imageInputs = imageInputContainer.querySelectorAll('.image-input');
+        const imageInputs = document.querySelectorAll('#image-input-hidden-container .image-input');
         const filesToUpload = [];
         imageInputs.forEach(input => { if (input.files[0]) filesToUpload.push(input.files[0]); });
         return await uploadImages(filesToUpload, userId);
