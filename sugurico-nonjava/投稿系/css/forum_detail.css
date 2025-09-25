@@ -142,6 +142,22 @@ main{
     color: #888;
 }
 
+.action-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+}
+
+.action-button.edit-button { background-color: #007bff; }
+.action-button.edit-button:hover { background-color: #0056b3; }
+.action-button.delete-button { background-color: #dc3545; }
+.action-button.delete-button:hover { background-color: #c82333; }
+
 /* --- レスポンシブ設定 (画面幅が768px以下) --- */
 @media (max-width: 768px) {
 
