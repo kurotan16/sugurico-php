@@ -66,6 +66,7 @@ function initializePage(){
             searchTitle.textContent = '検索結果';
             searchCount.textContent = `${totalposts}件の投稿が見つかりました。`;
             if (posts && posts.length > 0) {
+                console.log(posts);
                 postsListContainer.innerHTML = posts.map(post => renderPost(post)).join('');
             } else {
                 postsListContainer.innerHTML = '<p>該当する投稿は見つかりませんでした。</p>';
@@ -95,7 +96,7 @@ function renderPost(post) {
                             <div class="post-item-content">
                             <h3>${escapeHTML(post.title)} <small style="color:gray;">${timeAgoString}</small> </h3>
                                 <p>${nl2br(post.text.length > 20 ? post.text.slice(0, 20) + '...' : post.text).replace(/\n/g, '<br>')}</p>
-                                <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
+                                <small>投稿者: ${escapeHTML(post.user_name)}</small>
                                 <br>
                                 <small style="color:gray;">${remainingTime}</small>
                             </div>
