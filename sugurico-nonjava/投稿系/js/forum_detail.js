@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', async () =>{
     // --- 2. ログイン状態を取得 ---
     const {data: {session}} = await supabaseClient.auth.getSession();
     const currentUser = session?.user;
+    
 
     try {
         // --- 3. 投稿データを取得 ---
@@ -30,16 +31,18 @@ document.addEventListener('DOMContentLoaded', async () =>{
             imagesResponse, 
             commentsResponse
         ] = await Promise.all([
-            supabaseClient.from('forums').select('*,users(user_name)').eq('forum_id',forumId).single(),
+            supabaseClient.from('forums').select('*,users!user_id_auth(user_name)').eq('forum_id',forumId).single(),
             supabaseClient.from('tag').select('tag_dic(tag_name)').eq('forum_id',forumId),
             supabaseClient.from('forum_images').select('image_url').eq('post_id',forumId).order('display_order'),
             supabaseClient.from('comments').select(`
                 comment_id,
                 comment_text,
                 created_at,
-                users (user_name)
+                users!user_id_auth(user_name)
                 `).eq('forum_id',forumId).order('created_at',{ascending: false})
         ]);
+        console.log(postResponse.error);
+        console.log(postResponse.data);
         if (postResponse.error || !postResponse.data) throw new Error('投稿が見つからないか、取得に失敗しました。');
         
         const post = postResponse.data;
