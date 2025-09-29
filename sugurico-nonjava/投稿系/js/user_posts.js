@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             const {data: targetUser, error: userError} = await supabaseClient
             .from('users')
-            .select('user_name')
+            .select('users!forums_user_id_auth_fkey(user_name)')
             .eq('id', targetUserId)
             .single();
             if(userError || !targetUser) throw new Error('ユーザーが見つかりません。');

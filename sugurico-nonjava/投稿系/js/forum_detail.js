@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () =>{
             imagesResponse, 
             commentsResponse
         ] = await Promise.all([
-            supabaseClient.from('forums').select('*,users(user_name)').eq('forum_id',forumId).single(),
+            supabaseClient.from('forums').select('*,users!forums_user_id_auth_fkey(user_name)').eq('forum_id',forumId).single(),
             supabaseClient.from('tag').select('tag_dic(tag_name)').eq('forum_id',forumId),
             supabaseClient.from('forum_images').select('image_url').eq('post_id',forumId).order('display_order'),
             supabaseClient.from('comments').select(`
@@ -212,15 +212,15 @@ document.addEventListener('DOMContentLoaded', async () =>{
         const {
             data: comments,error
         } = await supabaseClient
-                    .from('comments')
-                    .select(`
-        comment_id,
-        comment_text,
-        created_at,
-        users ( user_name )
-    `)
-                    .eq('forum_id', forumId)
-                    .order('created_at', {ascending:false});
+            .from('comments')
+            .select(`
+                comment_id,
+                comment_text,
+                created_at,
+                users(user_name)
+            `)
+            .eq('forum_id', forumId)
+            .order('created_at', {ascending:false});
 
 
         if (error) {

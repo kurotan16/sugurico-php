@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 1. クエリのベースを作成
             let query = supabaseClient
                 .from('forums')
-                .select('*, users(user_name), forum_images(image_url)', { count: 'exact' });
+                .select('*, users!forums_user_id_auth_fkey(user_name), forum_images(image_url)', { count: 'exact' });
 
             // 2. 常に自分の投稿だけに絞り込む
             query = query.eq('user_id_auth', currentUser.id);

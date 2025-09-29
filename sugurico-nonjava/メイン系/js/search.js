@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // ③ 抜き出したforum_idを使って、最終的に表示する投稿データを取得
                 const { data, error } = await supabaseClient
                     .from('forums')
-                    .select('*, users(user_name), forum_images(image_url)')
+                    .select('*, users!forums_user_id_auth_fkey(user_name), forum_images(image_url)')
                     .in('forum_id', pagedForumIds)
                     .order('forum_id', { ascending: false });
 
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             let dataQuery = supabaseClient
                 .from('forums')
-                .select('*, users(user_name), forum_images(image_url)');
+                .select('*, users!forums_user_id_auth_fkey(user_name), forum_images(image_url)');
 
             if (keyword) {
                 countQuery = countQuery.like(column, `%${keyword}%`);
