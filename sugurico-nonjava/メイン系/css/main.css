@@ -43,6 +43,11 @@ header nav  a {
     margin-left: 15px;
 }
 
+.aisatu{
+    position: relative;
+    left: 20px;
+}
+
 .post-list .post-item {
     border: 1px solid #ddd;
     border-radius: 5px;
