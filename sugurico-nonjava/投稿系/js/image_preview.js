@@ -1,7 +1,7 @@
 // image_preview.js
 'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     // --- 要素の取得 ---
     const uploadContainer = document.getElementById('image-upload-container');
     const hiddenInputContainer = document.getElementById('image-input-hidden-container');
@@ -10,8 +10,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!uploadContainer || !hiddenInputContainer || !addButtonWrapper) return;
 
+    // ▼▼▼ プレミアム状態をチェック ▼▼▼
+    let isPremium = false;
+    // ログインユーザーの情報をDBから直接取得する
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (user) {
+        const { data: profile, error } = await supabaseClient
+            .from('users')
+            .select('premium_expires_at')
+            .eq('id', user.id)
+            .single();
+        
+        // プレミアム期限が未来の日付なら、isPremiumをtrueにする
+        if (profile && profile.premium_expires_at && new Date(profile.premium_expires_at) > new Date()) {
+            isPremium = true;
+        }
+    }
+
     // --- 設定 ---
-    const isPremium = false; // 将来的にユーザー情報から取得
     const MAX_IMAGES = isPremium ? 6 : 3;
     maxImagesCountSpan.textContent = MAX_IMAGES;
     let fileInputCounter = 1;

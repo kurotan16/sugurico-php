@@ -67,6 +67,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 await handleDeletePost(postId);
             }
         });
+
+        // 「プレミアム体験」ボタンのクリックイベント
+        const premiumButton = document.getElementById('premium-button');
+        premiumButton.addEventListener('click', async () => {
+            if (!confirm('1日間、プレミアム機能を有効にしますか？')) {
+                return;
+            }
+
+            try {
+                // プレミアム期限を「今から24時間後」に設定
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + 1);
+
+                // Supabaseのusersテーブルを更新
+                const { error } = await supabaseClient
+                    .from('users')
+                    .update({ premium_expires_at: expiryDate.toISOString() })
+                    .eq('id', currentUser.id); // 必ず自分のIDを指定
+
+                if (error) throw error;
+
+                alert('プレミアム機能が有効になりました！\n期限は24時間後です。');
+                // ボタンを無効化するなど、UIを更新しても良い
+                premiumButton.disabled = true;
+                premiumButton.textContent = 'プレミアム有効中';
+
+            } catch (error) {
+                console.error('プレミアム化エラー:', error);
+                alert('エラーが発生し、プレミアム機能を有効にできませんでした。');
+            }
+        });
     }
 
     //  ユーザーの投稿を取得し、表示する関数
