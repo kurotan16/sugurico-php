@@ -8,20 +8,30 @@ document.addEventListener('DOMContentLoaded', async() =>{
     const passwordInput = document.getElementById('password-input');
     const authButton = document.getElementById('auth-button');
     const authMessageArea = document.getElementById('auth-message-area');
+    const subscribeButton = document.getElementById('subscribe-button');
+    const planSelect = document.getElementById('plan-select');
+    const subscriptionStatus = document.getElementById('subscription-status');
 
     let currentUser;
 
     async function initializePage() {
-        const {data: {user}, error} = await supabaseClient.auth.getUser();
+        const {data: {user}} = await supabaseClient.auth.getUser();
         if(!user){
             window.location.href = 'login.html';
             return;
         }
         currentUser = user;
+        
+        const {data:premiumStatus, error} = await supabaseClient
+            .from('premium')
+            .select('status')
+            .eq('id', currentUser.id)
+            .single();
 
-        // 既にプレミアム会員か確認
-        //const {data: premium, error: premiumError}= await supabaseClient.from('premium')...
-        //if(premium){window.location.href = 'premium_edit.html'; return;}    
+        if(premiumStatus && premiumStatus.status === 'active'){
+            window.location.href = 'premium_edit.html';
+            return;
+        }
         
         checkLockStatus();
 
@@ -31,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async() =>{
     //  イベントリスナーを設定
     function setupEventListeners(){
         authButton.addEventListener('click', handlePasswordAuth);
+        subscribeButton.addEventListener('click', handleSubscription);
     }
 
     async function handlePasswordAuth(){
@@ -53,6 +64,47 @@ document.addEventListener('DOMContentLoaded', async() =>{
         } else {
             handleAuthSuccess();
         }
+    }
+
+    //  プレミアム登録処理 (シミュレーション)
+
+    async function handleSubscription(){
+        subscribeButton.disabled = true;
+        subscriptionStatus.textContent = '登録処理中...';
+
+        try {
+            const selectedPlan = planSelect.value;
+            const limitDate = new Date();
+            if(selectedPlan === 'monthly'){
+                limitDate.setMonth(limitDate.getMonth() + 1);
+            } else if(selectedPlan === 'yearly'){
+                limitDate.setFullYear(limitDate.getFullYear() + 1);
+            }
+
+            const {error} = await supabaseClient
+                .from('premium')
+                .upsert({
+                    id: currentUser.id,
+                    plan : selectedPlan,
+                    status: 'active',
+                    limit_date: limitDate.toISOString(),
+                    updated_at: new Date().toISOString()
+            });
+            if (error) throw error;
+
+            // --- 成功 ---
+
+            subscriptionStatus.textContent = 'プレミアム登録が完了しました！';
+            setTimeout(() => {
+                window.location.href = 'premium_edit.html';
+            }, 2000);
+
+        } catch (error) {
+            console.error('登録処理に失敗:', error);
+            subscriptionStatus.textContent = `登録処理に失敗しました: ${error.message}`;
+            subscribeButton.disabled = false;
+        }
+        
     }
 
     // 認証成功時の処理

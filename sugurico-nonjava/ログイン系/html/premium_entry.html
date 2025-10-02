@@ -40,14 +40,23 @@
             </ul>
             <p>月額500円で、いつでも解約可能です。</p>
             <p>※お支払いはクレジットカードのみとなります</p>
-            <select name="" id=""></select>
-            <input type="text" id="card-number" placeholder="カード番号">
+            <select id="plan-select">
+                <option value="monthly">月額プラン - 500円/月</option>
+                <option value="yearly">年額プラン - 5,000円/年</option>
+            </select>
+            <!-- カードブランドのselectは、今回は使わないのでコメントアウトまたは削除 -->
+            <!-- <select id="card-brand-select"> ... </select> -->
+            
+            <p style="margin-top: 15px; font-weight: bold;">カード情報を入力 (シミュレーション)</p>
+            <input type="text" id="card-number" placeholder="カード番号 (例: 1234-5678-9012-3456)">
             <input type="text" id="expiry-date" placeholder="有効期限 (MM/YY)">
             <input type="text" id="cardholder-name" placeholder="カード名義人">
-            <input type="text" id="cvc" placeholder="セキュリティコード">
+            <input type="text" id="cvc" placeholder="セキュリティコード (CVC)">
+            
             <button type="button" id="subscribe-button">登録する</button>
             <div id="subscription-status" style="margin-top: 20px;"></div>
-        </div></main>
+        </div>
+    </main>
 
         <!-- 共通フッター -->
         <footer id="footer-container"></footer>
