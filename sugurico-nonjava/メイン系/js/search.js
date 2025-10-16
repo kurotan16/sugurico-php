@@ -1,60 +1,30 @@
 // search.js
 
-document.addEventListener('DOMContentLoaded', () => {
+'use strict';
 
-<<<<<<< HEAD
+document.addEventListener('DOMContentLoaded', async () => {
+
     const { data: { session } } = await supabaseClient.auth.getSession();
-=======
-    // --- HTML要素の取得 ---
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
     const searchTitle = document.getElementById('search-title');
     const searchCount = document.getElementById('search-count');
     const postsListContainer = document.getElementById('posts-list-container');
     const paginationContainer = document.getElementById('pagination-container');
-<<<<<<< HEAD
     const urlParams = new URLSearchParams(window.location.search);
     const keyword = urlParams.get('keyword')?.trim() || '';
     const type = urlParams.get('type') || 'title';
     let currentPage = parseInt(urlParams.get('page')) || 1;
-=======
 
-    // 詳細検索フォームの要素
-    const toggleSearchButton = document.getElementById('toggle-search-button');
-    const advancedSearchForm = document.getElementById('advanced-search-form');
-    const filterButton = document.getElementById('filter-button');
-    const keywordInput = document.getElementById('keyword-input');
-    const authorInput = document.getElementById('author-input');
-    const tagInput = document.getElementById('tag-input');
-    const periodSelect = document.getElementById('period-select');
-    const sortSelect = document.getElementById('sort-select');
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
-
-    //  絞り込み検索を実行し、結果を描画するメイン関数
-    function initializePage() {
-        const urlParams = new URLSearchParams(window.location.search);
-        keywordInput.value = urlParams.get('keyword') || '';
-        authorInput.value = urlParams.get('') || '';
-        tagInput.value = urlParams.get('') || '';
-        periodSelect.value = urlParams.get('') || '';
-        sortSelect.value = urlParams.get('') || '';
-
-        setupEventListeners();
-        performSearch(parseInt(urlParams.get('page')) || 1);
+    if (!keyword) {
+        searchTitle.textContent = 'すべての投稿';
+    } else {
+        searchTitle.textContent = `「${escapeHTML(keyword)}」の検索結果(${type})`;
     }
 
-    function setupEventListeners() {
-        toggleSearchButton.addEventListener('click', () => {
-            const isHidden = advancedSearchForm.style.display === 'none';
-            advancedSearchForm.style.display = isHidden ? 'block' : 'none';
-            toggleSearchButton.textContent = isHidden ? '詳細検索を閉じる' : '詳細検索';
-        });
-        filterButton.addEventListener('click', () => performSearch(1))
-    }
-    async function performSearch(page = 1) {
-        postsListContainer.innerHTML = '検索中…';
-        paginationContainer.innerHTML = '';
+    try {
+        const postsPerPage = 10;
+        let totalPosts = 0;
+        let posts = [];
 
-<<<<<<< HEAD
         if (keyword && type === 'tag') {
             // --- ▼▼▼ タグ検索のロジック ▼▼▼ ---
             // ① キーワードに一致するタグを`tag_dic`から検索し、関連する投稿ID(`forum_id`)を取得
@@ -110,52 +80,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const { data, error } = await dataQuery
                 .order('forum_id', { ascending: false })
                 .range(offset, offset + postsPerPage - 1);
-=======
-        try {
-            //  フォームから現在の検索条件を取得
-            const searchParams = {
-                keyword_param: keywordInput.value.trim(),
-                author_param: authorInput.value.trim(),
-                tag_param: tagInput.value.trim(),
-                period_param: periodSelect.value,
-                sort_order_param: sortSelect.value,
-                page_param: page,
-                limit_param: 10
-            };
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
 
-            //  RPCでDB関数を呼び出し、総件数とページデータを一度に取得
-            const { data, error, count } = await supabaseClient
-                .rpc('search_public_forums', searchParams, { count: 'exact' });
             if (error) throw error;
-
-            const posts = data;
-            const totalposts = count ?? 0;
-
-            searchTitle.textContent = '検索結果';
-            searchCount.textContent = `${totalposts}件の投稿が見つかりました。`;
-            if (posts && posts.length > 0) {
-                console.log(posts);
-                postsListContainer.innerHTML = posts.map(post => renderPost(post)).join('');
-            } else {
-                postsListContainer.innerHTML = '<p>該当する投稿は見つかりませんでした。</p>';
-            }
-            renderPagination(totalposts, page, 10);
-        } catch (error) {
-            console.error('検索エラー:', error);
-            postsListContainer.innerHTML = `<p>検索中にエラーが発生しました。</p>`;
+            posts = data;
         }
+
+        searchCount.textContent = `${totalPosts}件の投稿が見つかりました。`;
+
+        if (posts.length > 0) {
+            postsListContainer.innerHTML = posts.map(post => renderPostHTML(post)).join('');
+        } else {
+            postsListContainer.innerHTML = '<p>該当する投稿は見つかりませんでした。</p>';
+        }
+
+        renderPagination(totalPosts, currentPage, postsPerPage, keyword, type);
+
+    } catch (error) {
+        console.error('検索エラー:', error);
+        searchCount.textContent = '';
+        postsListContainer.innerHTML = `<p>検索中にエラーが発生しました: ${escapeHTML(error.message)}</p>`;
     }
 
+    // -----------------------------
+    // ヘルパー関数 (変更なし)
+    // -----------------------------
 
-<<<<<<< HEAD
     function renderPostHTML(post) {
         // --- 1. サムネイルと各種時間情報の準備 (既存のロジック) ---
-=======
-
-
-    function renderPost(post) {
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
         let thumbnailHTML = '';
         if (post.forum_images && post.forum_images.length > 0) {
             thumbnailHTML = `<div class="post-item-thumbnail"><img src="${post.forum_images[0].image_url}" alt="投稿画像"></div>`;
@@ -192,31 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- 4. 最終的なHTML構造を組み立てる ---
         return `
-<<<<<<< HEAD
             <article class="post-item">
                 ${postContentHTML}
                 ${postActionsHTML}
             </article>
         `;
-=======
-                    <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
-                        <article class="post-item ${thumbnailHTML ? 'has-thumbnail' : ''}">
-                            
-                            <div class="post-item-content">
-                            <h3>${escapeHTML(post.title)} <small style="color:gray;">${timeAgoString}</small> </h3>
-                                <p>${nl2br(post.text.length > 20 ? post.text.slice(0, 20) + '...' : post.text).replace(/\n/g, '<br>')}</p>
-                                <small>投稿者: ${escapeHTML(post.user_name)}</small>
-                                <br>
-                                <small style="color:gray;">${remainingTime}</small>
-                            </div>
-                            ${thumbnailHTML}
-                        </article>
-                    </a>
-                `;
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
     }
 
-    function renderPagination(totalItems, currentPage, itemsPerPage) {
+    function renderPagination(totalItems, currentPage, itemsPerPage, keyword, type) {
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         if (totalPages <= 1) {
             paginationContainer.innerHTML = '';
@@ -224,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let paginationHTML = '';
-        const baseLink = new URLSearchParams(window.location.search);
+        const baseLink = `?keyword=${encodeURIComponent(keyword)}&type=${encodeURIComponent(type)}`;
 
         if (currentPage > 1) {
             paginationHTML += `<a href="${baseLink}&page=${currentPage - 1}">« 前へ</a>`;
@@ -244,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         paginationContainer.innerHTML = paginationHTML;
     }
-<<<<<<< HEAD
 
     function escapeHTML(str) {
         if (!str) return '';
@@ -296,7 +229,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 
-=======
-    initializePage();
-});
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d

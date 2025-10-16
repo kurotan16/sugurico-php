@@ -2,10 +2,6 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', async () => {
-<<<<<<< HEAD
-=======
-    // header.jsで初期化済みのsupabaseクライアントをグローバルスコープから取得
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
 
     // --- HTML要素の取得 ---
     const postForm = document.getElementById('post-form');
@@ -23,7 +19,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-<<<<<<< HEAD
     // --- 1. 編集モードか新規投稿モードかを判断 ---
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('edit_id');
@@ -36,9 +31,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- 2. フォーム送信イベントリスナー (ページに1つだけ) ---
-=======
-    // --- フォーム送信イベント ---
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
     postForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         submitButton.disabled = true;
@@ -46,7 +38,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         messageArea.style.display = 'none';
 
         try {
-<<<<<<< HEAD
             if (editId) {
                 // 【更新処理】を実行
                 await handleUpdatePost(editId);
@@ -60,52 +51,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 ? `forum_detail.html?id=${editId}` 
                 : '../../メイン系/html/index.html';
 
-=======
-            // --- 1. 画像をSupabase Storageにアップロード ---
-            // ★ コンテナの中から、すべてのファイル入力欄を取得
-            const imageInputs = imageInputContainer.querySelectorAll('.image-input');
-            const filesToUpload = [];
-            imageInputs.forEach(input => {
-                if (input.files[0]) {
-                    filesToUpload.push(input.files[0]);
-                }
-            });
-            // ★ 収集したファイルのリストをアップロード関数に渡す
-            const imageUrls = await uploadImages(filesToUpload);
-
-            // --- 2. 投稿本体(forumsテーブル)をDBに保存 ---
-            const { data: savedForum,
-                error: forumError
-            } = await supabaseClient.from('forums').insert({
-                user_id_auth: user.id,
-                title: titleInput.value,
-                text: textInput.value,
-                delete_date: calculateDeleteDate(expireSelect.value)
-            }).select() // INSERTしたデータを返すようにする
-                .single();
-            if (forumError) throw error;
-
-            // --- 3. タグをDBに保存 ---
-            const tagInputs = document.querySelectorAll('#tag-container input.tag-input');
-            const tagValues = Array.from(tagInputs).map(input => input.value.trim()).filter(Boolean);
-
-            // 配列から重複したタグを自動的に除去
-            const tags = [...new Set(tagValues)];
-
-            if (tags.length > 0) {
-                await saveTags(savedForum.forum_id, tags);
-
-            }
-
-            // --- 4. 画像URLをDBに保存 ---
-            if (imageUrls.length > 0) {
-                await saveImageUrls(savedForum.forum_id, imageUrls);
-            }
-
-            // --- 成功 ---
-            alert('投稿が完了しました。');
-            window.location.href = '../../メイン系/html/index.html';
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
         } catch (error) {
             messageArea.textContent = '処理に失敗しました: ' + error.message;
             messageArea.className = 'message error';
@@ -128,7 +73,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 1. 画像をアップロード
         const imageUrls = await uploadAllImages(user.id);
 
-<<<<<<< HEAD
         // 2. 投稿本体をDBに保存
         const { data: savedForum, error: forumError } = await supabaseClient.from('forums').insert({
             user_id_auth: user.id,
@@ -273,33 +217,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const uploadedUrls = [];
         for (const result of results) {
             if (result.error) throw new Error('画像アップロードに失敗: ' + result.error.message);
-=======
-    async function uploadImages(files) {
-        const uploadedUrls = [];
-        if (!files || files.length === 0) return uploadedUrls;
-
-        // ★ forEachではなく、Promise.allで並列アップロードすると高速
-        const uploadPromises = Array.from(files).map(file => {
-            const fileExt = file.name.split('.').pop();
-            const randomName = crypto.randomUUID();
-            const fileName = `${user.id}/${randomName}.${fileExt}`;
-
-            return supabaseClient
-                .storage
-                .from('post-images')
-                .upload(fileName, file);
-        });
-
-        // すべてのアップロードが完了するのを待つ
-        const results = await Promise.all(uploadPromises);
-
-        // 成功したものの公開URLを取得
-        for (const result of results) {
-            if (result.error) {
-                // 1つでも失敗したらエラーを投げる
-                throw new Error('画像アップロードに失敗:' + result.error.message);
-            }
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
             const { data: { publicUrl } } = supabaseClient.storage.from('post-images').getPublicUrl(result.data.path);
             uploadedUrls.push(publicUrl);
         }
@@ -307,7 +224,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /**
-<<<<<<< HEAD
      * タグ情報をDBに保存する関数
      */
     async function saveTags(forumId, tagNames) {
@@ -318,108 +234,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         const newTagNames = tagNames.filter(name => !existingTagsMap.has(name));
         if (newTagNames.length > 0) {
             const { data: insertedTags, error: insertError } = await supabaseClient.from('tag_dic').insert(newTagNames.map(name => ({ tag_name: name }))).select('tag_id, tag_name');
-=======
-         * タグ情報をDBに保存する関数
-         * @param {number} forumId - 紐付ける投稿のID
-         * @param {string[]} tagNames - タグ名の文字列の配列
-         */
-    async function saveTags(forumId, tagNames) {
-        // --- 1. まず、既存のタグをDBからまとめて取得 ---
-        const {
-            data: existingTags,
-            error: selectError
-        } = await supabaseClient
-            .from('tag_dic')
-            .select('tag_id, tag_name')
-            .in('tag_name', tagNames);// 配列内のいずれかの名前に一致するものを検索
-
-        if (selectError) throw selectError;
-
-        // 検索しやすいように、{"tagName": tagId} の形式のマップに変換
-        const existingTagsMap = new Map(
-            existingTags.map(
-                tag => [
-                    tag.tag_name,
-                    tag.tag_id
-                ]
-            )
-        );
-
-        // --- 2. 存在しないタグを特定し、DBに新規登録 ---
-        const newTagNames = tagNames.filter(name =>
-            !existingTagsMap.has(name)
-        );
-
-        let newTagIds = [];
-        if (newTagNames.length > 0) {
-            const newTagsToInsert = newTagNames.map(name => ({
-                tag_name: name
-            }));
-
-            const {
-                data: insertedTags,
-                error: insertError
-            } = await supabaseClient.from('tag_dic')
-                .insert(newTagsToInsert)
-                .select('tag_id, tag_name');
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
             if (insertError) throw insertError;
             insertedTags.forEach(tag => existingTagsMap.set(tag.tag_name, tag.tag_id));
         }
         const tagIdsToLink = tagNames.map(name => existingTagsMap.get(name));
-<<<<<<< HEAD
         const linksToInsert = tagIdsToLink.map(tagId => ({ forum_id: forumId, tag_id: tagId }));
         const { error: linkError } = await supabaseClient.from('tag').insert(linksToInsert);
         if (linkError) throw linkError;
-=======
-
-        // 中間テーブルにINSERTするためのデータを作成
-        const linksToInsert = tagIdsToLink.map(tagId => ({
-            forum_id: forumId,
-            tag_id: tagId
-        }));
-        const { error: linkError } = await supabaseClient
-            .from('tag')// ★中間テーブル名
-            .insert(linksToInsert);
-
-        if (linkError) throw linkError;
-
-
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
     }
 
     /**
      * 画像URLをDBに保存する関数
      */
     async function saveImageUrls(forumId, urls) {
-<<<<<<< HEAD
         const imageData = urls.map((url, index) => ({ post_id: forumId, image_url: url, display_order: index + 1 }));
         const { error } = await supabaseClient.from('forum_images').insert(imageData);
         if (error) throw error;
-=======
-        const imageData = urls.map(
-            (url, index) => ({
-                post_id: forumId,
-                image_url: url,
-                display_order: index + 1
-            }));
-        const { error } = await supabaseClient.from('forum_images').insert(imageData);
-        if (error) throw error;
-
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
     }
 
     /**
      * 公開期限の日時を計算する関数
      */
     function calculateDeleteDate(expiresOption) {
-<<<<<<< HEAD
         // (この関数の中身は変更なし)
         if (expiresOption === 'permanent') return null;
-=======
-        if (expiresOption === 'permanent') return null;
-
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
         const date = new Date();
         if (expiresOption === 'private') return date.toISOString(); // privateの場合もISO文字列を返すのが望ましい
         const days = parseInt(expiresOption.replace('days', ''));

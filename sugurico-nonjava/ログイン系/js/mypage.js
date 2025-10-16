@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     //  ページの初期化を行うメイン関数
     async function initializePage() {
         //  1. ログイン状態とユーザー情報を取得
-        const { data: { session } } = await supabaseClient.auth.getSession();
+        const  {data:{session}} = await supabaseClient.auth.getSession();
         if (!session) {
             window.location.href = 'login.html'; // ログインページへリダイレクト
             return;
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // 「絞り込み」ボタンのクリックイベント
-        filterButton.addEventListener('click', () => {
+        filterButton.addEventListener('click',  () => {
             fetchAndDisplayUserPosts(1); // 1ページ目から表示      
         });
 
@@ -104,18 +104,18 @@ document.addEventListener('DOMContentLoaded', () => {
     async function populateUserTags() {
         try {
             //  SupabaseのRPCで、作成したDB関数 "get_user_tags" を呼び出す
-            const { data: tags, error } = await supabaseClient.
-                rpc(
-                    'get_user_tags', {
-                    user_id_param: currentUser.id   //  関数の引数に、ログイン中のユーザーIDを渡す
-                }
-                );
+            const {data: tags, error} = await supabaseClient.
+                                        rpc(
+                                            'get_user_tags', {
+                                                user_id_param: currentUser.id   //  関数の引数に、ログイン中のユーザーIDを渡す
+                                            }
+                                        );
 
-            if (error) throw error;
+            if(error) throw error;
 
             //  <select>の中身を一度クリアし、「すべてのタグ」を先頭に追加
             tagSelect.innerHTML = '<option value="">すべてのタグ</option>'
-
+            
             if (tags && tags.length > 0) {
                 tags.forEach(tag => {
                     const option = document.createElement('option');
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
         } catch (error) {
-            console.error('ユーザーのタグリスト取得に失敗:', error);
+            console.error('ユーザーのタグリスト取得に失敗:',error);
             // エラー時でも最低限の選択肢を表示
             tagSelect.innerHTML = '<option value="">すべてのタグ</option>';
         }
@@ -140,7 +140,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const postsPerPage = 10;
             const offset = (page - 1) * postsPerPage;
 
-<<<<<<< HEAD
             // --- ▼▼▼ RPCをやめて、JSでクエリを組み立てる ▼▼▼ ---
             
             // 1. クエリのベースを作成
@@ -183,19 +182,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // 5. クエリを実行
             const { data: posts, error, count: totalPosts } = await query;
             
-=======
-            const { data, error, count } = await supabaseClient.rpc('filter_user_posts', {
-                user_id_param: currentUser.id,
-                keyword_param: keywordInput.value.trim(),
-                period_param: periodSelect.value,
-                tag_id_param: tagSelect.value ? parseInt(tagSelect.value) : null,
-                sort_order_param: sortSelect.value,
-                page_param: page,
-                limit_param: postsPerPage
-            }, {
-                count: 'exact'
-            });
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
             if (error) throw error;
             // --- ▲▲▲ クエリ組み立てはここまで ▲▲▲ ---
 
@@ -205,11 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 postsListContainer.innerHTML = '<p>該当する投稿はありません。</p>';
             }
-<<<<<<< HEAD
             renderPagination(totalPosts ?? 0, page, postsPerPage);
-=======
-            renderPagination(totalPosts, page, postsPerPage);
->>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
         } catch (error) {
             console.error('投稿の取得に失敗:', error);
             postsListContainer.innerHTML = `<p>投稿の取得中にエラーが発生しました。:${error.message}</p>`;
@@ -269,26 +251,26 @@ document.addEventListener('DOMContentLoaded', () => {
         let paginationHTML = '';
 
         const params = new URLSearchParams();
-        if (keywordInput.value.trim() !== '') params.set('keyword', kewordInput.value.trim());
-        if (periodSelect.value !== 'all') params.set('period', periodSelect.value);
-        if (sortSelect.value !== 'newest') params.set('sort', sortSelect.value);
-        if (tagSelect.value !== '') params.set('tag', tagSelect.value);
+        if(keywordInput.value.trim() !== '') params.set('keyword', kewordInput.value.trim());
+        if(periodSelect.value !== 'all') params.set('period', periodSelect.value);
+        if(sortSelect.value !== 'newest') params.set('sort', sortSelect.value);
+        if(tagSelect.value !== '') params.set('tag', tagSelect.value);
 
-        if (currentPage > 1) {
+        if(currentPage > 1) {
             params.set('page', currentPage - 1);
             paginationHTML += `<a href="?${params.toString()}" class="pagination-button">前へ</a>`;
         }
 
-        for (let i = 1; i <= totalPages; i++) {
+        for(let i = 1; i <= totalPages; i++) {
             params.set('page', i);
-            if (i === currentPage) {
+            if(i === currentPage) {
                 paginationHTML += `<span class="pagination-button current">${i}</span>`;
             } else {
                 paginationHTML += `<a href="?${params.toString()}" class="pagination-button">${i}</a>`;
             }
         }
 
-        if (currentPage < totalPages) {
+        if(currentPage < totalPages) {
             params.set('page', currentPage + 1);
             paginationHTML += `<a href="?${params.toString()}" class="pagination-button">次へ</a>`;
         }

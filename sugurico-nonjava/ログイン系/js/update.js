@@ -13,21 +13,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     const messageArea = document.getElementById('message-area');
 
     // --- 1. ログイン状態をチェックし、現在のユーザー情報を取得 ---
-    const { data: { user }, error: userError } = await supabaseClient.auth.getUser();
+    const {data: {user}, error:userError} = await supabaseClient.auth.getUser();
     console.log("取得したユーザー情報:", user);
     console.log("ユーザー情報取得時のエラー:", userError);
-    if (!user) {
+    if(!user) {
         window.location.href = 'login.html';
         return;
     }
 
     // --- 2. DBからプロフィール情報を取得してフォームに表示 ---
     try {
-        const { data: profile, error } = await supabaseClient
-            .from('users')
-            .select('name, user_name, login_id, mail')
-            .eq('id', user.id)// AuthのIDを使って検索
-            .single();
+        const {data: profile, error} = await supabaseClient
+        .from('users')
+        .select('name, user_name, login_id, mail')
+        .eq('id', user.id)// AuthのIDを使って検索
+        .single();
         if (error) throw error;
         if (profile) {
             nameInput.value = profile.name;
@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         messageArea.className = 'message error';
         messageArea.style.display = 'block';
     }
-
+    
     // --- 3. フォーム送信イベントの処理 ---
-    updateForm.addEventListener('submit', async (event) => {
+    updateForm.addEventListener('submit', async(event) =>{
         event.preventDefault();
         submitButton.disabled = true;
         submitButton.textContent = '更新中...';
@@ -51,22 +51,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             // --- 3a. パスワードの更新 ---
             const newPassword = passwordInput.value;
             if (newPassword) {
-                const { error: passwordError } = await supabaseClient
-                    .auth
-                    .updateUser({ password: newPassword });
+                const {error: passwordError} = await supabaseClient
+                                                    .auth
+                                                    .updateUser({password:newPassword});
                 if (passwordError) throw passwordError;
             }
 
             // --- 3b. プロフィール情報(usersテーブル)の更新 ---
-            const { error: profileError } = await supabaseClient
-                .from('users')
-                .update({
-                    name: nameInput.value,
-                    user_name: usernameInput.value,
-                    login_id: loginIdInput.value
-                })
-                .eq('id', user.id);
-            if (profileError) throw profileError;
+            const{error: profileError} = await supabaseClient
+                                        .from('users')
+                                        .update({name: nameInput.value,
+                                            user_name: usernameInput.value,
+                                            login_id: loginIdInput.value
+                                        })
+                                        .eq('id', user.id);
+            if(profileError) throw profileError;
 
             // --- 3c. Authのメタデータも更新 (任意だが推奨) ---
             await supabaseClient.auth.updateUser({
@@ -83,11 +82,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             messageArea.style.display = 'block';
             passwordInput.value = '';// パスワード欄をクリア
         } catch (error) {
-
+            
             // エラー処理
             if (error.message.includes('duplicate key value violates unique constraint "users_login_id_key"')) {
                 messageArea.textContent = 'このログインIDは既に使用されています';
-
+                
             } else {
                 messageArea.textContent = '更新に失敗しました:' + error.message;
             }
