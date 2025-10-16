@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchCount = document.getElementById('search-count');
     const postsListContainer = document.getElementById('posts-list-container');
     const paginationContainer = document.getElementById('pagination-container');
-    
+
     // 詳細検索フォームの要素
     const toggleSearchButton = document.getElementById('toggle-search-button');
     const advancedSearchForm = document.getElementById('advanced-search-form');
@@ -19,22 +19,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const sortSelect = document.getElementById('sort-select');
 
     //  絞り込み検索を実行し、結果を描画するメイン関数
-function initializePage(){
-    const urlParams = new URLSearchParams(window.location.search);
-    keywordInput.value = urlParams.get('keyword') || '';
-    authorInput.value = urlParams.get('') || '';
-    tagInput.value = urlParams.get('') || '';
-    periodSelect.value = urlParams.get('') || '';
-    sortSelect.value = urlParams.get('') || '';
+    function initializePage() {
+        const urlParams = new URLSearchParams(window.location.search);
+        keywordInput.value = urlParams.get('keyword') || '';
+        authorInput.value = urlParams.get('') || '';
+        tagInput.value = urlParams.get('') || '';
+        periodSelect.value = urlParams.get('') || '';
+        sortSelect.value = urlParams.get('') || '';
 
-    setupEventListeners();
-    performSearch(parseInt(urlParams.get('page')) || 1);
+        setupEventListeners();
+        performSearch(parseInt(urlParams.get('page')) || 1);
     }
 
-    function setupEventListeners(){
+    function setupEventListeners() {
         toggleSearchButton.addEventListener('click', () => {
             const isHidden = advancedSearchForm.style.display === 'none';
-            advancedSearchForm.style.display  = isHidden ? 'block' : 'none';
+            advancedSearchForm.style.display = isHidden ? 'block' : 'none';
             toggleSearchButton.textContent = isHidden ? '詳細検索を閉じる' : '詳細検索';
         });
         filterButton.addEventListener('click', () => performSearch(1))
@@ -46,18 +46,18 @@ function initializePage(){
         try {
             //  フォームから現在の検索条件を取得
             const searchParams = {
-                keyword_param:  keywordInput.value.trim(),
-                author_param:  authorInput.value.trim(),
-                tag_param:  tagInput.value.trim(),
-                period_param:   periodSelect.value,
-                sort_order_param:   sortSelect.value,
+                keyword_param: keywordInput.value.trim(),
+                author_param: authorInput.value.trim(),
+                tag_param: tagInput.value.trim(),
+                period_param: periodSelect.value,
+                sort_order_param: sortSelect.value,
                 page_param: page,
-                limit_param:    10
+                limit_param: 10
             };
 
             //  RPCでDB関数を呼び出し、総件数とページデータを一度に取得
-            const {data, error, count} = await supabaseClient
-            .rpc('search_public_forums', searchParams, {count:'exact'});
+            const { data, error, count } = await supabaseClient
+                .rpc('search_public_forums', searchParams, { count: 'exact' });
             if (error) throw error;
 
             const posts = data;
@@ -80,8 +80,8 @@ function initializePage(){
 
 
 
-    
-function renderPost(post) {
+
+    function renderPost(post) {
         let thumbnailHTML = '';
         if (post.forum_images && post.forum_images.length > 0) {
             thumbnailHTML = `<div class="post-item-thumbnail"><img src="${post.forum_images[0].image_url}" alt="投稿画像"></div>`;
@@ -106,7 +106,7 @@ function renderPost(post) {
                 `;
     }
 
-function renderPagination(totalItems, currentPage, itemsPerPage) {
+    function renderPagination(totalItems, currentPage, itemsPerPage) {
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         if (totalPages <= 1) {
             paginationContainer.innerHTML = '';
@@ -134,5 +134,5 @@ function renderPagination(totalItems, currentPage, itemsPerPage) {
 
         paginationContainer.innerHTML = paginationHTML;
     }
-initializePage();
+    initializePage();
 });

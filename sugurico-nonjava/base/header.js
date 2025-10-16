@@ -17,24 +17,24 @@ async function setupHeaderAndFooter() {
     const headerContainer = document.getElementById('header-container');
     const footerContainer = document.getElementById('footer-container');
 
-    if(!headerContainer || !footerContainer) {
+    if (!headerContainer || !footerContainer) {
         console.warn('header-containerまたはfooter-containerが見つかりません。');
         return;
     }
 
     // --- ログイン状態を取得 ---
-    const {data: {session}} = await supabaseClient.auth.getSession();
+    const { data: { session } } = await supabaseClient.auth.getSession();
 
     let navHTML = '';// ナビゲーション部分のHTML
-    
-    if(session && session.user) {
+
+    if (session && session.user) {
         // 【ログインしている場合のナビゲーション】
         const userName = session.user.user_metadata?.user_name || 'ゲスト';
         navHTML = `
             <a href="../../ログイン系/html/mypage.html">${escapeHTML(userName)}さん</a>
             <a href="#" id="logout-button">ログアウト</a>
         `;
-        
+
     } else {
         // 【ログインしていない場合のナビゲーション】
         navHTML = `
@@ -42,7 +42,7 @@ async function setupHeaderAndFooter() {
             <a href="../../ログイン系/html/signin.html">新規登録</a>
         `;
     }
-    
+
     const headerHTML = `
         <div class="header-logo">
             <h1><a href="../../メイン系/html/index.html">スグリコ</a></h1>
@@ -100,7 +100,7 @@ function escapeHTML(str) {
         str = String(str);
     }
 
-    return str.replace(/[&<>"']/g, function(match) {
+    return str.replace(/[&<>"']/g, function (match) {
         return {
             '&': '&',
             '<': '<',

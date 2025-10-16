@@ -1,6 +1,6 @@
 'use strict';
 
-document.addEventListener('DOMContentLoaded', async() =>{
+document.addEventListener('DOMContentLoaded', async () => {
 
 
     const passwordAuthSection = document.getElementById('password-auth-section');
@@ -15,38 +15,38 @@ document.addEventListener('DOMContentLoaded', async() =>{
     let currentUser;
 
     async function initializePage() {
-        const {data: {user}} = await supabaseClient.auth.getUser();
-        if(!user){
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) {
             window.location.href = 'login.html';
             return;
         }
         currentUser = user;
-        
-        const {data:premiumStatus, error} = await supabaseClient
+
+        const { data: premiumStatus, error } = await supabaseClient
             .from('premium')
             .select('status')
             .eq('id', currentUser.id)
             .single();
 
-        if(premiumStatus && premiumStatus.status === 'active'){
+        if (premiumStatus && premiumStatus.status === 'active') {
             window.location.href = 'premium_edit.html';
             return;
         }
-        
+
         checkLockStatus();
 
         setupEventListeners();
     }
 
     //  イベントリスナーを設定
-    function setupEventListeners(){
+    function setupEventListeners() {
         authButton.addEventListener('click', handlePasswordAuth);
         subscribeButton.addEventListener('click', handleSubscription);
     }
 
-    async function handlePasswordAuth(){
+    async function handlePasswordAuth() {
         const password = passwordInput.value;
-        if(!password){
+        if (!password) {
             showMessage('パスワードを入力してください。', 'error');
             return;
         }
@@ -54,12 +54,12 @@ document.addEventListener('DOMContentLoaded', async() =>{
         // --- 本人確認 ---
         // ★ Supabaseには直接パスワードを検証するAPIがないため、
         // ★ signInWithPasswordを再認証として利用する
-        const {error} = await supabaseClient.auth.signInWithPassword({
+        const { error } = await supabaseClient.auth.signInWithPassword({
             email: currentUser.email,
             password: password
         });
 
-        if(error){
+        if (error) {
             handleAuthFailure();
         } else {
             handleAuthSuccess();
@@ -68,28 +68,28 @@ document.addEventListener('DOMContentLoaded', async() =>{
 
     //  プレミアム登録処理 (シミュレーション)
 
-    async function handleSubscription(){
+    async function handleSubscription() {
         subscribeButton.disabled = true;
         subscriptionStatus.textContent = '登録処理中...';
 
         try {
             const selectedPlan = planSelect.value;
             const limitDate = new Date();
-            if(selectedPlan === 'monthly'){
+            if (selectedPlan === 'monthly') {
                 limitDate.setMonth(limitDate.getMonth() + 1);
-            } else if(selectedPlan === 'yearly'){
+            } else if (selectedPlan === 'yearly') {
                 limitDate.setFullYear(limitDate.getFullYear() + 1);
             }
 
-            const {error} = await supabaseClient
+            const { error } = await supabaseClient
                 .from('premium')
                 .upsert({
                     id: currentUser.id,
-                    plan : selectedPlan,
+                    plan: selectedPlan,
                     status: 'active',
                     limit_date: limitDate.toISOString(),
                     updated_at: new Date().toISOString()
-            });
+                });
             if (error) throw error;
 
             // --- 成功 ---
@@ -104,12 +104,12 @@ document.addEventListener('DOMContentLoaded', async() =>{
             subscriptionStatus.textContent = `登録処理に失敗しました: ${error.message}`;
             subscribeButton.disabled = false;
         }
-        
+
     }
 
     // 認証成功時の処理
 
-    function handleAuthSuccess(){
+    function handleAuthSuccess() {
         // 失敗カウントをリセット
         localStorage.removeItem(`auth_fails_${currentUser.id}`);
 
@@ -121,20 +121,20 @@ document.addEventListener('DOMContentLoaded', async() =>{
     }
 
     // 認証失敗時の処理
-    function handleAuthFailure(){
+    function handleAuthFailure() {
         const failKey = `auth_fails_${currentUser.id}`;
         const lockKey = `auth_lock_${currentUser.id}`;
 
         const MAX_FAILS = 5;
-        
+
         // 1. 現在の失敗回数を取得 (なければ0)
         let failCount = parseInt(localStorage.getItem(failKey) || '0');
-        failCount ++;
+        failCount++;
 
         // 2. 失敗回数を保存
         localStorage.setItem(failKey, failCount);
 
-        if(failCount >= MAX_FAILS){
+        if (failCount >= MAX_FAILS) {
 
             // 3. 5回失敗したら、ロック時刻を保存
 
@@ -142,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async() =>{
             localStorage.setItem(lockKey, lockUntil);
 
             // 4. Supabase Edge Functionを呼び出して、メールを送信
-           // sendLockNotificationEmail();
+            // sendLockNotificationEmail();
 
             // 5. ページをロック
             lockPage(lockUntil);
@@ -152,26 +152,26 @@ document.addEventListener('DOMContentLoaded', async() =>{
     }
 
     // メール通知用のEdge Functionを呼び出す
-    async function sendLockNotificationEmail(){
+    async function sendLockNotificationEmail() {
         try {
-            const {data, error} = await supabaseClient.functions.invoke(
-                'send-lock-email',{
-                    body : {
-                        email: currentUser.email,
-                        userName: currentUser.user_metadata?.userName
-                    }
-                });
+            const { data, error } = await supabaseClient.functions.invoke(
+                'send-lock-email', {
+                body: {
+                    email: currentUser.email,
+                    userName: currentUser.user_metadata?.userName
+                }
+            });
 
-            if(error) throw error;
-            console.log('ロック通知メールの送信をリクエストしました。',data);
+            if (error) throw error;
+            console.log('ロック通知メールの送信をリクエストしました。', data);
         } catch (error) {
-            console.error('メール送信Functionの呼び出しに失敗:',error);
+            console.error('メール送信Functionの呼び出しに失敗:', error);
         }
     }
 
     // ページをロックし、再試行可能な時刻を表示する
 
-    function lockPage(lockUntil){
+    function lockPage(lockUntil) {
         passwordInput.disabled = true;
         authButton.disabled = true;
         const unlockTime = new Date(lockUntil).toLocaleString('ja-JP');
@@ -179,11 +179,11 @@ document.addEventListener('DOMContentLoaded', async() =>{
     }
 
     //  ページ読み込み時にロック状態をチェックする
-    function checkLockStatus(){
+    function checkLockStatus() {
         const lockKey = `auth_lock_${currentUser.id}`;
         const lockUntil = parseInt(localStorage.getItem(lockKey) || '0');
 
-        if(Date.now() < lockUntil){
+        if (Date.now() < lockUntil) {
             lockPage(lockUntil);
         }
 
