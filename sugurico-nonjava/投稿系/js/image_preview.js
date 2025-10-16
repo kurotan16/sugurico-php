@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addButtonWrapper = document.getElementById('add-image-button-wrapper');
     const maxImagesCountSpan = document.getElementById('max-images-count');
 
+<<<<<<< HEAD
     if (!uploadContainer || !hiddenInputContainer || !addButtonWrapper) return;
 
     // ▼▼▼ プレミアム状態をチェック ▼▼▼
@@ -31,12 +32,73 @@ document.addEventListener('DOMContentLoaded', async () => {
     const MAX_IMAGES = isPremium ? 6 : 3;
     maxImagesCountSpan.textContent = MAX_IMAGES;
     let fileInputCounter = 1;
+=======
+    // もし必要な要素がなければ処理を中断
+    if (!imageInputContainer ||
+        !addButton ||
+        !removeButton ||
+        !previewContainer) {
+        return;
+    }
+
+    let currentObjectUrls = [];
+
+    // ★ プレミアム機能の判定（仮）
+    // 実際には、ログインユーザーの情報を取得して判定します
+    const isPremium = false;
+    const maxImages = isPremium ? 6 : 3;
+    maxImagesCountSpan.textContent = maxImages;
+
+    // --- イベントリスナー ---
+
+    // [追加]ボタンのクリックイベント
+    addButton.addEventListener('click', () => {
+        const currentInputs = imageInputContainer.querySelectorAll('.image-input');
+        const lastInput = currentInputs[currentInputs.length - 1];
+        // 最後の入力欄にファイルが選択されているかチェック
+        if (lastInput.files.length === 0) {
+            alert('最後の画像を選択してから追加してください。');
+            lastInput.click(); // ファイル選択ダイアログを開く
+            return;
+        }
+        if (currentInputs.length < maxImages) {
+            addImageInput();
+        } else {
+            alert(`画像は最大${maxImages}枚までです。`);
+        }
+    });
+
+    // [削除]ボタンのクリックイベント
+    removeButton.addEventListener('click', () => {
+        const wrappers = imageInputContainer.querySelectorAll('.image-input-wrapper');
+        if (wrappers.length > 1) {
+            wrappers[wrappers.length - 1].remove();
+            updateAllPreviews();// 削除後にプレビュー全体を更新
+        }
+    });
+
+    // 動的に追加される要素に対応するため、親要素にイベントリスナーを設定（イベント移譲）
+    imageInputContainer.addEventListener('change', (event) => {
+        if (event.target.classList.contains('image-input')) {
+            updateAllPreviews();
+        }
+    });
+
+    // --- 関数群 ---
+>>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
 
     /**
      * 新しいファイル入力欄を生成する関数
      */
+<<<<<<< HEAD
     function createNewFileInput() {
         fileInputCounter++;
+=======
+    function addImageInput() {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'image-input-wrapper';
+
+>>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
         const newInput = document.createElement('input');
         newInput.type = 'file';
         newInput.id = `image-input-${fileInputCounter}`;
@@ -62,7 +124,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         allInputs.forEach(input => {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
+<<<<<<< HEAD
                 currentImageCount++;
+=======
+                if (!file.type.startsWith('image/')) return;
+>>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
 
                 const previewWrapper = document.createElement('div');
                 previewWrapper.className = 'image-preview-wrapper';
@@ -71,6 +137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 img.src = URL.createObjectURL(file);
                 img.onload = () => URL.revokeObjectURL(img.src); // メモリ解放
 
+<<<<<<< HEAD
                 const deleteButton = document.createElement('button');
                 deleteButton.type = 'button';
                 deleteButton.className = 'preview-delete-button';
@@ -85,6 +152,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 previewWrapper.appendChild(deleteButton);
                 // 「+」ボタンの前にプレビューを追加
                 uploadContainer.insertBefore(previewWrapper, addButtonWrapper);
+=======
+                // ★ 新しく生成したURLを管理配列に追加
+                currentObjectUrls.push(objectUrl);
+
+                img.src = objectUrl;
+                img.alt = '画像プレビュー';
+                img.addEventListener('click', () => { showModal(objectUrl); });
+
+                previewWrapper.appendChild(img);
+                previewContainer.appendChild(previewWrapper);
+
+>>>>>>> 9dd67833a76ed6b939350439b376d1a9f92bc29d
             }
         });
 
