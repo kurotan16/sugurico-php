@@ -1,21 +1,21 @@
-.form-container{
+.form-container {
     max-width: 400px;
     padding: 40px auto;
     padding: 30px;
     background-color: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     text-align: center;
 }
 
-.form-container h1{
+.form-container h1 {
     margin-bottom: 25px;
     font-size: 24px;
     color: #333;
 }
 
-.form-group{
+.form-group {
     margin-bottom: 20px;
     text-align: left;
 }
@@ -27,18 +27,18 @@
     color: #555;
 }
 
-.form-group input[type = "text"],
-.form-group input[type = "password"],
-.form-group input[type = "email"]{
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group input[type="email"] {
     width: 100%;
     padding: 12px;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-    font-size:16px;
+    font-size: 16px;
 }
 
-.form-button{
+.form-button {
     width: 100%;
     padding: 12px;
     background-color: #007bff;
@@ -50,7 +50,8 @@
     cursor: pointer;
     transition: background-color 0.2s;
 }
-.form-button:hover{
+
+.form-button:hover {
     background-color: #0056b3;
 }
 
@@ -59,25 +60,28 @@
     font-size: 14px;
 }
 
-.form-footer a{
-    color:#007bff;
+.form-footer a {
+    color: #007bff;
     text-decoration: none;
 }
-.form-footer a:hover{
+
+.form-footer a:hover {
     text-decoration: underline;
 }
 
-.message{
+.message {
     padding: 10px;
     margin-bottom: 4px;
     text-align: center;
 }
-.message.success{
+
+.message.success {
     background-color: #d4edda;
     color: #155724;
     border: 1px solid #c3e6cb;
 }
-.message.error{
+
+.message.error {
     background-color: #f8d7da;
     color: #721c24;
     border: 1px solid #f5c6b6;
@@ -105,7 +109,8 @@
 .image-preview-wrapper img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* 画像をボックスに合わせて中央で切り抜き */
+    object-fit: cover;
+    /* 画像をボックスに合わせて中央で切り抜き */
     cursor: pointer;
 }
 
@@ -162,13 +167,15 @@
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 16px;
-    font-family: inherit; /* bodyのフォントを継承 */
+    font-family: inherit;
+    /* bodyのフォントを継承 */
 }
 
 /* 本文入力欄の高さ */
 .form-group textarea {
     height: 150px;
-    resize: vertical; /* 縦方向のリサイズのみ許可 */
+    resize: vertical;
+    /* 縦方向のリサイズのみ許可 */
 }
 
 /* --- 画像プレビュー --- */
@@ -180,7 +187,8 @@
     padding: 10px;
     border: 1px dashed #ccc;
     border-radius: 4px;
-    min-height: 120px; /* 画像がない時もある程度の高さを確保 */
+    min-height: 120px;
+    /* 画像がない時もある程度の高さを確保 */
     align-items: center;
     justify-content: flex-start;
 }
@@ -192,6 +200,7 @@
     overflow: hidden;
     position: relative;
 }
+
 .image-preview-wrapper img {
     width: 100%;
     height: 100%;
@@ -212,7 +221,8 @@
     box-sizing: border-box;
 }
 
-.insert-button, .delete-button {
+.insert-button,
+.delete-button {
     padding: 12px;
     color: white;
     border: none;
@@ -224,12 +234,14 @@
 }
 
 .insert-button {
-    background-color: #00a2ff; /* 投稿ボタンは緑色に */
+    background-color: #00a2ff;
+    /* 投稿ボタンは緑色に */
     color: white;
 }
 
 .delete-button {
-    background-color: #ff0000; /* 投稿ボタンは緑色に */
+    background-color: #ff0000;
+    /* 投稿ボタンは緑色に */
     color: white;
 }
 
@@ -237,7 +249,8 @@
 .submit-button {
     width: 100%;
     padding: 12px;
-    background-color: #28a745; /* 投稿ボタンは緑色に */
+    background-color: #28a745;
+    /* 投稿ボタンは緑色に */
     color: white;
     border: none;
     border-radius: 4px;
@@ -246,6 +259,7 @@
     cursor: pointer;
     transition: background-color 0.2s;
 }
+
 .submit-button:hover {
     background-color: #218838;
 }
@@ -283,13 +297,15 @@
     border-radius: 4px;
     box-sizing: border-box;
     font-size: 16px;
-    font-family: inherit; /* bodyのフォントを継承 */
+    font-family: inherit;
+    /* bodyのフォントを継承 */
 }
 
 /* 本文入力欄の高さ */
 .form-group textarea {
     height: 150px;
-    resize: vertical; /* 縦方向のリサイズのみ許可 */
+    resize: vertical;
+    /* 縦方向のリサイズのみ許可 */
 }
 
 /* --- 画像プレビュー --- */
@@ -301,7 +317,8 @@
     padding: 10px;
     border: 1px dashed #ccc;
     border-radius: 4px;
-    min-height: 120px; /* 画像がない時もある程度の高さを確保 */
+    min-height: 120px;
+    /* 画像がない時もある程度の高さを確保 */
     align-items: center;
     justify-content: flex-start;
 }
@@ -313,6 +330,7 @@
     overflow: hidden;
     position: relative;
 }
+
 .image-preview-wrapper img {
     width: 100%;
     height: 100%;
@@ -337,7 +355,8 @@
 .submit-button {
     width: 100%;
     padding: 12px;
-    background-color: #28a745; /* 投稿ボタンは緑色に */
+    background-color: #28a745;
+    /* 投稿ボタンは緑色に */
     color: white;
     border: none;
     border-radius: 4px;
@@ -346,6 +365,7 @@
     cursor: pointer;
     transition: background-color 0.2s;
 }
+
 .submit-button:hover {
     background-color: #218838;
 }
@@ -354,7 +374,9 @@
     .form-container {
         margin: 10px;
         padding: 20px;
-        border: none; /* スマホでは境界線を消してスッキリ見せる */
-        box-shadow: none; /* 影も消す */
+        border: none;
+        /* スマホでは境界線を消してスッキリ見せる */
+        box-shadow: none;
+        /* 影も消す */
     }
 }

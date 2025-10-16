@@ -7,13 +7,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const removeButton = document.getElementById('remove-image-button');
     const previewContainer = document.getElementById('image-preview-container');
     const maxImagesCountSpan = document.getElementById('max-images-count');
-    
+
     // もし必要な要素がなければ処理を中断
-    if(!imageInputContainer || 
-        !addButton || 
-        !removeButton || 
-        !previewContainer){
-            return;
+    if (!imageInputContainer ||
+        !addButton ||
+        !removeButton ||
+        !previewContainer) {
+        return;
     }
 
     let currentObjectUrls = [];
@@ -25,9 +25,9 @@ document.addEventListener('DOMContentLoaded', () => {
     maxImagesCountSpan.textContent = maxImages;
 
     // --- イベントリスナー ---
-    
+
     // [追加]ボタンのクリックイベント
-    addButton.addEventListener('click', () =>{
+    addButton.addEventListener('click', () => {
         const currentInputs = imageInputContainer.querySelectorAll('.image-input');
         const lastInput = currentInputs[currentInputs.length - 1];
         // 最後の入力欄にファイルが選択されているかチェック
@@ -53,8 +53,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 動的に追加される要素に対応するため、親要素にイベントリスナーを設定（イベント移譲）
-    imageInputContainer.addEventListener('change', (event) =>{
-        if(event.target.classList.contains('image-input')) {
+    imageInputContainer.addEventListener('change', (event) => {
+        if (event.target.classList.contains('image-input')) {
             updateAllPreviews();
         }
     });
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function addImageInput() {
         const wrapper = document.createElement('div');
         wrapper.className = 'image-input-wrapper';
-        
+
         const newInput = document.createElement('input');
         newInput.type = 'file';
         newInput.name = 'images[]';
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         allInputs.forEach(input => {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
-                if (!file.type.startsWith('image/')) return; 
+                if (!file.type.startsWith('image/')) return;
 
                 const previewWrapper = document.createElement('div');
                 previewWrapper.className = 'image-preview-wrapper';
@@ -105,11 +105,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 img.src = objectUrl;
                 img.alt = '画像プレビュー';
-                img.addEventListener('click', () => {showModal(objectUrl);});
+                img.addEventListener('click', () => { showModal(objectUrl); });
 
                 previewWrapper.appendChild(img);
                 previewContainer.appendChild(previewWrapper);
-            
+
             }
         });
     }

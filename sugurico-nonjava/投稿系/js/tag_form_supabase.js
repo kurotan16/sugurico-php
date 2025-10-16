@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 最後の入力欄に何か入力されている場合は、確認メッセージを出す
             if (lastInput.value.trim() !== '') {
-                if(confirm('最後のタグ「' + lastInput.value + '」を削除しますか？')){
+                if (confirm('最後のタグ「' + lastInput.value + '」を削除しますか？')) {
                     lastWrapper.remove();
                 }
             } else {
@@ -61,29 +61,29 @@ document.addEventListener('DOMContentLoaded', () => {
      * 新しいタグ入力欄を追加する関数
      */
     function addTagInput() {
-       const wrapper = document.createElement('div');
-       wrapper.className = 'tag-input-wrapper';
-       
-       const newInput = document.createElement('input');
-       newInput.type = 'text';
-       newInput.name = 'tags[]';
-       newInput.placeholder = 'タグを入力';
-       newInput.className = 'tag-input';
+        const wrapper = document.createElement('div');
+        wrapper.className = 'tag-input-wrapper';
 
-       wrapper.appendChild(newInput);
-       const buttonContainer = document.getElementById('insert-tags').parentElement;
-       tagContainer.insertBefore(wrapper,buttonContainer);
+        const newInput = document.createElement('input');
+        newInput.type = 'text';
+        newInput.name = 'tags[]';
+        newInput.placeholder = 'タグを入力';
+        newInput.className = 'tag-input';
 
-       newInput.focus();
+        wrapper.appendChild(newInput);
+        const buttonContainer = document.getElementById('insert-tags').parentElement;
+        tagContainer.insertBefore(wrapper, buttonContainer);
+
+        newInput.focus();
 
     }
 
     function showButtons() {
-        
+
         const wrappers = tagContainer.querySelectorAll('.tag-input-wrapper');
         insertButton.style.display = 'inline';
         deleteButton.style.display = 'inline';
-        
+
         if (wrappers.length === 1) {
             deleteButton.style.display = 'none';
         }
@@ -92,5 +92,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    
+
 });
