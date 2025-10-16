@@ -21,19 +21,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const targetUserId = urlParams.get('id');
 
     async function initializePage() {
-        if (!targetUserId) {
+        if(!targetUserId) {
             pageTitle.textContent = 'ユーザーが指定されていません。';
             return;
         }
-
+        
         // --- 1. 表示対象ユーザーのプロフィール情報(user_name)を取得 ---
         try {
-            const { data: targetUser, error: userError } = await supabaseClient
-                .from('users')
-                .select('user_name')
-                .eq('id', targetUserId)
-                .single();
-            if (userError || !targetUser) throw new Error('ユーザーが見つかりません。');
+            const {data: targetUser, error: userError} = await supabaseClient
+            .from('users')
+            .select('users!forums_user_id_auth_fkey(user_name)')
+            .eq('id', targetUserId)
+            .single();
+            if(userError || !targetUser) throw new Error('ユーザーが見つかりません。');
             pageTitle.textContent = `${escapeHTML(targetUser.user_name)}さんの投稿一覧`
         } catch (e) {
             pageTitle.textContent = '';
@@ -53,19 +53,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             toggleSearchButton.textContent = isHidden ? '詳細検索を閉じる' : '詳細検索';
         });
 
-        filterButton.addEventListener('click', () => {
-            fetchAndDisplayUserPosts(1);
+        filterButton.addEventListener('click',  () => {
+            fetchAndDisplayUserPosts(1);   
         });
         console.log(3);
     }
 
-    async function populateUserTags() {
+    async function populateUserTags(){
         try {
-            const { data: tags, error } = await supabaseClient
-                .rpc('get_user_tags', {
-                    user_id_param: targetUserId
-                });
-            if (error) throw error;
+            const {data:tags, error} = await supabaseClient
+            .rpc('get_user_tags',{
+                user_id_param: targetUserId
+            });
+            if(error) throw error;
 
             tagSelect.innerHTML = '<option value="">すべてのタグ</option>';
             if (tags && tags.length > 0) {
@@ -81,23 +81,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function fetchAndDisplayUserPosts(page = 1) {
-        console.log(tagSelect.value);
+    async function fetchAndDisplayUserPosts(page = 1) {console.log(tagSelect.value);
         postsListContainer.innerHTML = '読み込み中...';
         paginationContainer.innerHTML = '';
         try {
             const postsPerPage = 10;
-            const { data, error, count } = await supabaseClient
-                .rpc('filter_other_user_posts', {//  mypage.jsにあるfilter_user_postsとは別(時間指定があるから)
-                    user_id_param: targetUserId,
-                    keyword_param: keywordInput.value.trim(),
-                    period_param: periodSelect.value,
-                    tag_id_param: tagSelect.value ? parseInt(tagSelect.value) : null,
-                    sort_order_param: sortSelect.value,
-                    page_param: page,
-                    limit_param: postsPerPage
-                }, { count: 'exact' });
-
+            const {data, error, count} = await supabaseClient
+            .rpc('filter_other_user_posts',{//  mypage.jsにあるfilter_user_postsとは別(時間指定があるから)
+                user_id_param: targetUserId,
+                keyword_param: keywordInput.value.trim(),
+                period_param: periodSelect.value,
+                tag_id_param: tagSelect.value ? parseInt(tagSelect.value) : null,
+                sort_order_param: sortSelect.value,
+                page_param: page,
+                limit_param: postsPerPage
+            },{count:'exact'});
+            
             if (error) {
                 throw error;
             }
@@ -107,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (posts && posts.length > 0) {
                 postsListContainer.innerHTML = posts.map(post => renderPostHTML(post)).join('');
             } else {
-                postsListContainer.innerHTML = '<p>該当する投稿はありません。</p>';
+               postsListContainer.innerHTML = '<p>該当する投稿はありません。</p>'; 
             }
             renderPagination(totalPosts, page, postsPerPage);
         } catch (error) {
@@ -116,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         console.log(4);
     }
-
+    
     initializePage();
 
     function renderPostHTML(post) {
@@ -129,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </a>
         `;
     }
-
+    
     function renderPagination(totalItems, currentPage, itemsPerPage) {
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         if (totalPages <= 1) {

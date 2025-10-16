@@ -1,0 +1,103 @@
+#header-container {
+    background-color: #fff;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center; /* 上下中央揃え */
+    gap: 20px; /* 要素間の隙間 */
+}
+
+/* --- ロゴ --- */
+.header-logo h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+.header-logo a {
+    color: inherit;
+    text-decoration: none;
+    flex-shrink: 0; /* ロゴが縮まないように */
+}
+
+/* --- 検索フォーム --- */
+.search-form-container {
+    flex-grow: 1; /* ★これが最重要！余ったスペースを埋めるように伸びる */
+    max-width: 600px; /* 伸びすぎ防止 */
+}
+.search-form-container form {
+    display: flex;
+    width: 100%;
+}
+.search-form-container input[type="text"] {
+    width: 100%; /* 親要素(form)の幅いっぱいに広がる */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+}
+.search-form-container select,
+.search-form-container button {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-left: none;
+    background-color: #f8f9fa;
+    flex-shrink: 0; /* 縮まないように */
+}
+.search-form-container button {
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+}
+
+/* --- ナビゲーション --- */
+.header-nav {
+    flex-shrink: 0; /* 縮まないように */
+}
+.header-nav a {
+    margin-left: 15px;
+    white-space: nowrap; /* ユーザー名が長くても改行されないように */
+}
+
+/* --- プレミアムバッジのスタイル --- */
+.premium-badge {
+    background-color: #FFD700; /* ゴールド */
+    color: #333; /* 暗めの文字色 */
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 8px;
+    vertical-align: middle; /* 文字の上下位置を中央に */
+}
+
+/* ===============================================
+   レスポンシブ対応 (画面幅が768px以下の場合)
+   =============================================== */
+@media (max-width: 768px) {
+    #header-container {
+        flex-direction: column; /* 要素を縦積みに変更 */
+        gap: 15px;
+        padding: 1rem;
+    }
+
+    /* ★nav要素(ログイン情報)を一番上に表示させる */
+    .header-nav {
+        order: -1;
+    }
+
+    .search-form-container {
+        max-width: none; /* PC用の最大幅指定を解除 */
+        width: 100%;
+    }
+
+    /* 検索フォーム内の各要素を縦積みに */
+    .search-form-container form {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .search-form-container input[type="text"],
+    .search-form-container select,
+    .search-form-container button {
+        width: auto;
+        border-radius: 4px;
+        border-left: 1px solid #ccc;
+    }
+}

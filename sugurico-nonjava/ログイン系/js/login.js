@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 if (loginForm) {
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // デフォルトの送信をキャンセル
-
+        
         messageArea.style.display = 'none'; // メッセージをクリア
         loginButton.disabled = true;
         loginButton.textContent = 'ログイン中...';
@@ -40,7 +40,7 @@ if (loginForm) {
                 userEmail = loginIdentifier;
             } else {
                 // @'がなければログインIDとみなし、DBから対応するメールアドレスを検索
-                const { data: user, error: findError } = await supabaseClient
+                const {data: user, error: findError} = await supabaseClient
                     .from('users')
                     .select('mail')
                     .eq('login_id', loginIdentifier)
@@ -79,7 +79,7 @@ if (loginForm) {
         }
     });
 }
-
+            
 /*** --- 旧コード ---
 if (loginForm) {
     loginForm.addEventListener('submit', async (event) => {

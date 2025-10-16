@@ -1,7 +1,7 @@
 // forum_detail.js
 'use strict';
 
-document.addEventListener('DOMContentLoaded', async () => {
+document.addEventListener('DOMContentLoaded', async () =>{
     // header.jsで初期化済みのsupabaseクライアントをグローバルスコープから取得
 
     // --- HTML要素の取得 ---
@@ -19,49 +19,46 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- 2. ログイン状態を取得 ---
-    const { data: { session } } = await supabaseClient.auth.getSession();
+    const {data: {session}} = await supabaseClient.auth.getSession();
     const currentUser = session?.user;
-
 
     try {
         // --- 3. 投稿データを取得 ---
-        const [
-            postResponse,
-            tagsResponse,
-            imagesResponse,
+        const[
+            postResponse, 
+            tagsResponse, 
+            imagesResponse, 
             commentsResponse
         ] = await Promise.all([
-            supabaseClient.from('forums').select('*,users!user_id_auth(user_name)').eq('forum_id', forumId).single(),
-            supabaseClient.from('tag').select('tag_dic(tag_name)').eq('forum_id', forumId),
-            supabaseClient.from('forum_images').select('image_url').eq('post_id', forumId).order('display_order'),
+            supabaseClient.from('forums').select('*,users!forums_user_id_auth_fkey(user_name)').eq('forum_id',forumId).single(),
+            supabaseClient.from('tag').select('tag_dic(tag_name)').eq('forum_id',forumId),
+            supabaseClient.from('forum_images').select('image_url').eq('post_id',forumId).order('display_order'),
             supabaseClient.from('comments').select(`
                 comment_id,
                 comment_text,
                 created_at,
-                users!user_id_auth(user_name)
-                `).eq('forum_id', forumId).order('created_at', { ascending: false })
+                users (user_name)
+                `).eq('forum_id',forumId).order('created_at',{ascending: false})
         ]);
-        console.log(postResponse.error);
-        console.log(postResponse.data);
         if (postResponse.error || !postResponse.data) throw new Error('投稿が見つからないか、取得に失敗しました。');
-
+        
         const post = postResponse.data;
 
         // --- 4. アクセス制御 ---
         const isOwner = currentUser && post.user_id_auth === currentUser.id;
-        if (!isOwner && post.delete_date && new Date(post.delete_date) < new Date()) {
-            throw new Error('この投稿の公開期限は終了しました。');
-        }
+        if(!isOwner && post.delete_date && new Date(post.delete_date) < new Date()){
+            throw new Error ('この投稿の公開期限は終了しました。');
+        } 
 
         // --- 5. 取得したデータでページを描画 ---
         renderPost(
-            post,
+            post, 
             tagsResponse.data || [],
             imagesResponse.data || []
         );
-        renderComments(commentsResponse.data || []);
+        renderComments(commentsResponse.data ||[]);
 
-        if (currentUser) {
+        if(currentUser){
             renderCommentForm(isOwner);
         } else {
             commentFormContainer.innerHTML = `<p><a href="../../ログイン系/html/login.html">ログイン</a>してコメントを投稿する</p>`;
@@ -86,7 +83,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const timeAgoHTML = timeAgo(post.created_at);
 
         // タグのHTMLを生成
-        const tagsHTML = tags.map(tag => `<a href="../../メイン系/html/search.html?keyword=${encodeURIComponent(tag.tag_dic.tag_name)}&type=tag" class="tag-link">#${escapeHTML(tag.tag_dic.tag_name)}</a>`).join(' ');
+        const tagsHTML = tags.map(tag =>`<a href="../../メイン系/html/search.html?keyword=${encodeURIComponent(tag.tag_dic.tag_name)}&type=tag" class="tag-link">#${escapeHTML(tag.tag_dic.tag_name)}</a>`).join(' ');
 
         // 画像のHTMLを生成
         const imagesHTML = images.map(image =>
@@ -95,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         let authorHTML = '';
         const authorName = escapeHTML(post.users?.user_name || '不明');
-        if (currentUser && post.user_id_auth !== currentUser.id) {
+        if(currentUser&& post.user_id_auth !== currentUser.id){
             authorHTML = `<a href="user_posts.html?id=${post.user_id_auth}">${authorName}</a>`;
         } else {
             authorHTML = authorName;
@@ -109,8 +106,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (isOwner) {
             ownerButtonsHTML = `
                 <div class="post-owner-actions">
-                    <a href="forum_input.html?edit_id=${post.forum_id}" class="edit-button">編集</a>
-                    <button type="button" id="delete-post-button" class="delete-button">削除</button>
+                    <a href="forum_input.html?edit_id=${post.forum_id}" class="action-button edit-button">編集</a>
+                    <button type="button" id="delete-post-button" class="action-button delete-button">削除</button>
                 </div>
             `;
         }
@@ -190,16 +187,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function handleCommentSubmit(event) {
         event.preventDefault();
         const commentText = event.target.querySelector('textarea').value.trim();
-        if (!commentText) return;
+        if(!commentText) return;
 
-        const { error } = await supabaseClient
-            .from('comments')
-            .insert({
-                forum_id: forumId,
-                user_id_auth: currentUser.id,// AuthのIDを紐付け
-                comment_text: commentText
-            })
-        if (error) {
+        const{ error } = await supabaseClient
+                                .from('comments')
+                                .insert({
+                                    forum_id:forumId,
+                                    user_id_auth: currentUser.id,// AuthのIDを紐付け
+                                    comment_text: commentText
+                                })
+        if (error){
             alert('コメントの投稿に失敗しました:' + error.message);
         } else {
             // 投稿成功後、コメント欄をリフレッシュ
@@ -213,22 +210,22 @@ document.addEventListener('DOMContentLoaded', async () => {
      */
     async function fetchAndRenderComments() {
         const {
-            data: comments, error
+            data: comments,error
         } = await supabaseClient
             .from('comments')
             .select(`
-        comment_id,
-        comment_text,
-        created_at,
-        users ( user_name )
-    `)
+                comment_id,
+                comment_text,
+                created_at,
+                users(user_name)
+            `)
             .eq('forum_id', forumId)
-            .order('created_at', { ascending: false });
+            .order('created_at', {ascending:false});
 
 
         if (error) {
             commentListContainer.innerHTML = '<p>コメントの読み込みに失敗しました。</p>';
-            return;
+            return;  
         }
         renderComments(comments);
     }
@@ -239,12 +236,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     function renderComments(comments) {
         console.log(comments);
-        if (comments && comments.length > 0) {
-
+        if(comments && comments.length > 0){
+            
             commentListContainer.innerHTML = comments.map(
                 comment => {
                     const commentTimeAgo = timeAgo(comment.created_at);
-
+                    
                     return `
                         <div class="comment-item">
                             <strong>${escapeHTML(comment.users?.user_name || '不明')}:</strong>

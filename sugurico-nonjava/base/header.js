@@ -17,24 +17,48 @@ async function setupHeaderAndFooter() {
     const headerContainer = document.getElementById('header-container');
     const footerContainer = document.getElementById('footer-container');
 
-    if (!headerContainer || !footerContainer) {
+    if(!headerContainer || !footerContainer) {
         console.warn('header-containerまたはfooter-containerが見つかりません。');
         return;
     }
 
     // --- ログイン状態を取得 ---
-    const { data: { session } } = await supabaseClient.auth.getSession();
+    const {data: {session}} = await supabaseClient.auth.getSession();
 
     let navHTML = '';// ナビゲーション部分のHTML
+    
+    if(session && session.user) {
+        // --- ▼▼▼ ここからプレミアム状態のチェック処理を追加 ▼▼▼ ---
 
-    if (session && session.user) {
+        // 1. DBからユーザーのプロフィール情報を取得
+        const { data: profile, error } = await supabaseClient
+            .from('users')
+            .select('premium_expires_at')
+            .eq('id', session.user.id)
+            .single();
+
+        if (error) {
+            console.error('プロフィール情報の取得に失敗:', error);
+        }
+
+        // 2. プレミアム状態を判定
+        let isPremium = false;
+        if (profile && profile.premium_expires_at && new Date(profile.premium_expires_at) > new Date()) {
+            isPremium = true;
+        }
+
+        // 3. プレミアムバッジのHTMLを生成
+        const premiumBadgeHTML = isPremium 
+            ? '<span class="premium-badge">PREMIUM</span>' 
+            : '';
+
         // 【ログインしている場合のナビゲーション】
         const userName = session.user.user_metadata?.user_name || 'ゲスト';
         navHTML = `
-            <a href="../../ログイン系/html/mypage.html">${escapeHTML(userName)}さん</a>
+            <a href="../../ログイン系/html/mypage.html">${escapeHTML(userName)}さん ${premiumBadgeHTML}</a>
             <a href="#" id="logout-button">ログアウト</a>
         `;
-
+        
     } else {
         // 【ログインしていない場合のナビゲーション】
         navHTML = `
@@ -42,7 +66,7 @@ async function setupHeaderAndFooter() {
             <a href="../../ログイン系/html/signin.html">新規登録</a>
         `;
     }
-
+    
     const headerHTML = `
         <div class="header-logo">
             <h1><a href="../../メイン系/html/index.html">スグリコ</a></h1>
@@ -100,7 +124,7 @@ function escapeHTML(str) {
         str = String(str);
     }
 
-    return str.replace(/[&<>"']/g, function (match) {
+    return str.replace(/[&<>"']/g, function(match) {
         return {
             '&': '&',
             '<': '<',

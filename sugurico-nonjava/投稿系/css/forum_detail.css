@@ -1,6 +1,6 @@
 /* --- forum_detail.php --- */
 /* --- 投稿詳細ページのレイアウト --- */
-main {
+main{
     max-width: 800px;
     margin: 20px auto;
     padding: 20px 30px;
@@ -9,21 +9,21 @@ main {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0, 1);
 }
 
-.post-detail h1 {
+.post-detail h1{
     font-size: 2em;
     margin-bottom: 0.5em;
     border-bottom: 2px solid #eee;
     padding-bottom: 0.5em;
 }
 
-.post-meta {
+.post-meta{
     font-size: 0.9em;
     color: #666;
     margin-bottom: 20px;
 }
 
 /* --- 投稿画像 --- */
-.post-images-container {
+.post-images-container{
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -49,16 +49,15 @@ main {
 }
 
 /* --- 投稿本文 --- */
-.post-content {
+.post-content{
     font-size: 1.1em;
     line-height: 1.7;
-    white-space: pre-wrap;
-    /* 改行とスペースをそのまま表示 */
+    white-space: pre-wrap; /* 改行とスペースをそのまま表示 */
     margin-bottom: 20px;
 }
 
 /* --- 投稿タグ --- */
-.post-tags {
+.post-tags{
     margin-bottom: 20px;
 }
 
@@ -66,7 +65,7 @@ main {
     display: inline-block;
     background-color: #e9ecef;
     color: #495957;
-    padding: 5px 10px;
+    padding:5px 10px;
     border-radius: 15px;
     font-size: 0.9em;
     margin-right: 8px;
@@ -90,7 +89,7 @@ main {
 }
 
 /* コメント投稿フォーム */
-#comment-form textarea {
+#comment-form textarea{
     width: 100%;
     padding: 10px;
     font-size: 1em;
@@ -101,7 +100,7 @@ main {
     resize: vertical;
 }
 
-#comment-form button {
+#comment-form button{
     padding: 10px 20px;
     background-color: #007bff;
     color: white;
@@ -110,12 +109,12 @@ main {
     cursor: pointer;
 }
 
-#comment-form button:hover {
+#comment-form button:hover{
     background-color: #0056b3;
 }
 
 /* コメント一覧 */
-.comment-list {
+.comment-list{
     overflow-y: scroll;
     max-height: 400px;
 }
@@ -138,10 +137,26 @@ main {
     margin: 5px 0;
 }
 
-.comment-item small {
+.comment-item small{
     font-size: 0.8em;
     color: #888;
 }
+
+.action-button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    text-decoration: none;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+}
+
+.action-button.edit-button { background-color: #007bff; }
+.action-button.edit-button:hover { background-color: #0056b3; }
+.action-button.delete-button { background-color: #dc3545; }
+.action-button.delete-button:hover { background-color: #c82333; }
 
 /* --- レスポンシブ設定 (画面幅が768px以下) --- */
 @media (max-width: 768px) {
@@ -153,21 +168,17 @@ main {
     }
 
     .post-detail h1 {
-        font-size: 1.5em;
-        /* タイトルの文字サイズを少し小さく */
+        font-size: 1.5em; /* タイトルの文字サイズを少し小さく */
     }
 
     /* --- 投稿画像 --- */
     .post-images-container {
-        justify-content: center;
-        /* 画像を中央揃えに */
+        justify-content: center; /* 画像を中央揃えに */
     }
 
     .post-image-wrapper {
-        width: calc(50% - 5px);
-        /* 2カラムで表示されるように調整 */
+        width: calc(50% - 5px); /* 2カラムで表示されるように調整 */
         height: auto;
-        aspect-ratio: 1 / 1;
-        /* 正方形を保つ */
+        aspect-ratio: 1 / 1; /* 正方形を保つ */
     }
 }

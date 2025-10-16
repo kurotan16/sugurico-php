@@ -49,7 +49,7 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
                 text,
                 delete_date,
                 created_at,
-                users!user_id_auth(user_name),
+                users!forums_user_id_auth_fkey(user_name),
                 forum_images ( image_url ) 
             `)
             .or('delete_date.is.null,delete_date.gt.now()') // 公開期限のチェック

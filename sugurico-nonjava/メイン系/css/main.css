@@ -1,0 +1,178 @@
+body{
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding:0;
+    background-color: #e2e2e2;
+    color: #333;
+}
+
+a{
+    color: #007bFF;
+    text-decoration: none;
+}
+
+a:hover{
+    text-decoration: underline;
+}
+
+h1, h2, h3{
+    margin-top: 0;
+}
+
+header {
+    background-color: #fff;
+    padding: 1rem 2rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+header h1 a {
+    color:inherit;
+    text-decoration: none;
+}
+
+header nav  a {
+    margin-left: 15px;
+}
+
+.post-list .post-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f9f9f9;
+    transition: box-shadow 0.2s;
+}
+
+.post-list .post-item:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.post-item .post-list a {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.post-list h3 {
+    margin: 0;
+    margin-bottom: 10px;
+}
+
+.floating-button {
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 60px;
+    height: 60px;
+    background-color: #007bff;
+    color: white;
+    font-size: 36px;
+    line-height: 60px;
+    border-radius: 50px;
+    text-decoration: none;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+}
+
+.floating-button:hover{
+    background-color: #0056b3;
+    transform: scale(1.1);
+}
+
+/* --- index.html の投稿リストを横並びにするスタイル --- */
+/* 親コンテナをFlexboxに設定 */
+.posts-container {
+    display: flex;
+    gap: 30px; /* 左右のカラム間の隙間 */
+    align-items: flex-start; /* コンテンツの高さが違っても上端を揃える */
+}
+
+/* 各カラムのスタイル */
+.posts-column {
+    flex: 1; /* コンテナ内で利用可能なスペースを均等に分け合う */
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 10px;
+    border: solid 1px #ddd;
+    margin: 0 10px;
+}
+/* --- index.html の投稿サムネイル用スタイル --- */
+/* 画像あり(has-thumbnail)の投稿アイテムをFlexboxに設定 */
+.post-item.has-thumbnail {
+    display: flex;
+    align-items: center; /* 上下中央揃え */
+    gap: 15px; /* 画像とテキストの間の隙間 */
+}
+
+/* サムネイル画像のコンテナ */
+.post-item-thumbnail {
+    flex-shrink: 0; /* コンテナが縮まないようにする */
+    width: 120px;   /* サムネイルの横幅 */
+    height: 90px;   /* サムネイルの高さ */
+    border-radius: 4px;
+    overflow: hidden; /* はみ出した画像を隠す */
+}
+
+/* サムネイル画像そのもの */
+.post-item-thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 画像の比率を保ったまま、コンテナ全体を覆うように調整 */
+}
+
+/* テキストコンテンツ部分 */
+.post-item-content {
+    flex-grow: 1; /* 残りのスペースをすべて使う */
+}
+
+@media (min-width: 769px) {
+    .aisatu{
+        position: relative;
+        left: 20px;
+    }
+}
+
+/* --- レスポンシブ対応 (スマートフォンなど) --- */
+/* 画面幅が768px以下になったら、横並びを解除して縦並びにします */
+@media (max-width: 768px) {
+    .posts-container {
+        display: flex;
+        align-items: unset; /* align-itemsを解除 */
+        flex-direction: column; /* 縦積みに変更 */
+        justify-content: center; /* 中央揃え */
+        gap: 20px;
+    }
+
+    h1 {
+        text-align-last: center;
+    }
+
+    /* --- メインコンテンツ --- */
+    main {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    /* --- サムネイル付き投稿リスト --- */
+    .post-item.has-thumbnail {
+        flex-direction: column; /* サムネイルとテキストも縦積みに */
+        align-items: flex-start;
+    }
+
+    .post-item-thumbnail {
+        width: 100%; /* サムネイルの幅を100%に */
+        height: 180px; /* 高さを固定 */
+    }
+}

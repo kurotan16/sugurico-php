@@ -3,32 +3,32 @@
 'use strict';
 
 function timeAgo(utcDatestr) {
-    if (!utcDatestr) return '';
+    if(!utcDatestr) return '';
 
     const postDate = new Date(utcDatestr);
     const now = new Date();
     const diffInSeconds = Math.floor((now - postDate) / 1000);
 
-    if (diffInSeconds < 5) return 'たった今';
-    if (diffInSeconds < 60) return `${diffInSeconds}秒前`;
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes}分前`;
+    if(diffInSeconds < 5) return 'たった今';
+    if(diffInSeconds < 60) return `${diffInSeconds}秒前`;
+    const diffInMinutes = Math.floor(diffInSeconds / 60);  
+    if(diffInMinutes < 60) return `${diffInMinutes}分前`;
     const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}時間前`;
+    if(diffInHours < 24) return `${diffInHours}時間前`;
     const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 30) return `${diffInDays}日前`;
+    if(diffInDays < 30) return `${diffInDays}日前`;
     const diffInMonths = Math.floor(diffInDays / 30);
-    if (diffInMonths < 12) return `${diffInMonths}ヶ月前`;
+    if(diffInMonths < 12) return `${diffInMonths}ヶ月前`;
     const diffInYears = Math.floor(diffInMonths / 12);
     return `${diffInYears}年前`;
 }
 
 
 function timeLeft(utcDatestr) {
-    if (!utcDatestr) return '無期限';
+    if(!utcDatestr) return '無期限';
     const deadline = new Date(utcDatestr);
-    const now = new Date() - 9 * 60 * 60 * 1000; // JSTに変換
-    if (deadline <= now) return '';
+    const now = new Date() - 9*60*60*1000; // JSTに変換
+    if(deadline <= now) return '';
 
     let diffInMs = deadline - now;
     const days = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
