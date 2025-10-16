@@ -28,10 +28,34 @@ async function setupHeaderAndFooter() {
     let navHTML = '';// ナビゲーション部分のHTML
     
     if(session && session.user) {
+        // --- ▼▼▼ ここからプレミアム状態のチェック処理を追加 ▼▼▼ ---
+
+        // 1. DBからユーザーのプロフィール情報を取得
+        const { data: profile, error } = await supabaseClient
+            .from('users')
+            .select('premium_expires_at')
+            .eq('id', session.user.id)
+            .single();
+
+        if (error) {
+            console.error('プロフィール情報の取得に失敗:', error);
+        }
+
+        // 2. プレミアム状態を判定
+        let isPremium = false;
+        if (profile && profile.premium_expires_at && new Date(profile.premium_expires_at) > new Date()) {
+            isPremium = true;
+        }
+
+        // 3. プレミアムバッジのHTMLを生成
+        const premiumBadgeHTML = isPremium 
+            ? '<span class="premium-badge">PREMIUM</span>' 
+            : '';
+
         // 【ログインしている場合のナビゲーション】
         const userName = session.user.user_metadata?.user_name || 'ゲスト';
         navHTML = `
-            <a href="../../ログイン系/html/mypage.html">${escapeHTML(userName)}さん</a>
+            <a href="../../ログイン系/html/mypage.html">${escapeHTML(userName)}さん ${premiumBadgeHTML}</a>
             <a href="#" id="logout-button">ログアウト</a>
         `;
         

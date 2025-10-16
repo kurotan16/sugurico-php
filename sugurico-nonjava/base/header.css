@@ -55,6 +55,17 @@
     white-space: nowrap; /* ユーザー名が長くても改行されないように */
 }
 
+/* --- プレミアムバッジのスタイル --- */
+.premium-badge {
+    background-color: #FFD700; /* ゴールド */
+    color: #333; /* 暗めの文字色 */
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 8px;
+    vertical-align: middle; /* 文字の上下位置を中央に */
+}
 
 /* ===============================================
    レスポンシブ対応 (画面幅が768px以下の場合)
