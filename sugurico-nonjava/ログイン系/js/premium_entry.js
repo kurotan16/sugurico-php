@@ -114,6 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // ★★★ "premiumStatus" (オブジェクト) の "status" プロパティをチェック ★★★
         if (premiumStatus && premiumStatus.status === 'active') {
+            alert('あなたは既にプレミアム会員です。会員情報ページに移動します。');
             window.location.href = 'premium_edit.html';
         }
     }
@@ -180,6 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         element.className = `message ${type}`;
         element.style.display = 'block';
     }
+
     function isValidLuhn(cardNumber) {
         //  2222-2222-2222-20
         const num = cardNumber.replace(/\D/g, '');
@@ -201,6 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         return (sum % 10) === 0;
     }
+    
     function isValidExpiry(expiryDate) {
         const match = expiryDate.match(/^(\d{2})\s*\/\s*(\d{2})$/);
         if (!match) return false;
