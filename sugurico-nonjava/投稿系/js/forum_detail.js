@@ -11,25 +11,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- 1. URLから投稿IDを取得 ---
     const urlParams = new URLSearchParams(window.location.search);
     const forumId = parseInt(urlParams.get('id'));
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const currentUser = session?.user;
 
+    // --- 2. 初期化処理の開始 ---
     if (!forumId) {
         postContainer.innerHTML = '<h1>無効な投稿IDです。</h1>';
         return;
     }
 
-    // --- 2. ログイン状態を取得 ---
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    const currentUser = session?.user;
-
-
     try {
-        // --- 3. 投稿データを取得 ---
-        const [
-            postResponse,
-            tagsResponse,
-            imagesResponse,
-            commentsResponse
-        ] = await Promise.all([
+        // --- 3. 必要なデータを並行して取得 ---
+        let isPremium = false;
+        let isBookmarked = false;
+
+        // ログインしている場合のみ、プレミアム情報とブックマーク情報を取得
+        if (currentUser) {
+            const [profileRes, bookmarkRes] = await Promise.all([
+                supabaseClient.from('users').select('premium_expires_at').eq('id', currentUser.id).single(),
+                supabaseClient.from('bookmark').select('*').eq('user_id', currentUser.id).eq('post_id', forumId).maybeSingle()
+            ]);
+
+            if (profileRes.data && profileRes.data.premium_expires_at && new Date(profileRes.data.premium_expires_at) > new Date()) {
+                isPremium = true;
+            }
+            if (bookmarkRes.data) {
+                isBookmarked = true;
+            }
+        }
+
+        // 投稿関連のデータを取得
+        const [postResponse, tagsResponse, imagesResponse, commentsResponse] = await Promise.all([
             supabaseClient.from('forums').select('*,users!user_id_auth(user_name)').eq('forum_id', forumId).single(),
             supabaseClient.from('tag').select('tag_dic(tag_name)').eq('forum_id', forumId),
             supabaseClient.from('forum_images').select('image_url').eq('post_id', forumId).order('display_order'),
@@ -114,16 +126,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             `;
         }
 
+        // ★ ブックマークボタン用のHTMLを生成
+        let bookmarkButtonHTML = '';
+        if (isPremium) {
+            const buttonText = isBookmarked ? 'ブックマーク解除' : 'ブックマークに追加';
+            const buttonClass = isBookmarked ? 'action-button delete-button' : 'action-button edit-button';
+            bookmarkButtonHTML = `
+                <div class="bookmark-action">
+                    <button type="button" id="bookmark-button" class="${buttonClass}" data-bookmarked="${isBookmarked}">${buttonText}</button>
+                </div>`;
+        }
+
         postContainer.innerHTML = `
-            ${ownerButtonsHTML} <!-- ★ ここにボタンを追加 -->
+            ${ownerButtonsHTML}
+            ${bookmarkButtonHTML}
             <h1>${escapeHTML(post.title)}</h1>
-            <p class="post-meta">投稿者:${authorHTML} </p>
+            <p class="post-meta">投稿者: ${authorHTML}</p>
             <p class="post-meta">投稿日時: ${timeAgoHTML}</p>
             <div class="post-images-container">${imagesHTML}</div>
             <div class="post-content">${nl2br(post.text)}</div>
             <div class="post-tags">${tagsHTML}</div>
-            ${remainingTimeHTML}
-        `; 
+            ${remainingTimeHTML}`;
 
         // 削除ボタンにイベントリスナーを設定
         if (isOwner) {
@@ -255,6 +278,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             ).join('');
         } else {
             commentListContainer.innerHTML = "<p>まだコメントはありません。</p>"
+        }
+    }
+
+    async function handleBookmarkToggle(event) {
+        const button = event.target;
+        const isCurrentlyBookmarked = button.dataset.bookmarked === 'true';
+        try {
+            if (isCurrentlyBookmarked) {
+                // ブックマークを削除
+                const { error } = await supabaseClient.from('bookmark').delete().eq('user_id', currentUser.id).eq('post_id', forumId);
+                if (error) throw error;
+            } else {
+                // ブックマークを追加
+                const { error } = await supabaseClient.from('bookmark').insert({ user_id: currentUser.id, post_id: forumId });
+                if (error) throw error;
+            }
+            const newIsBookmarked = !isCurrentlyBookmarked;
+            button.dataset.bookmarked = newIsBookmarked;
+            button.textContent = newIsBookmarked ? 'ブックマーク解除' : 'ブックマークに追加';
+            button.className = newIsBookmarked ? 'action-button delete-button' : 'action-button edit-button';
+        } catch (error) {
+            console.error('ブックマーク操作エラー:', error);
+            alert('ブックマーク操作に失敗しました。');
         }
     }
 });
