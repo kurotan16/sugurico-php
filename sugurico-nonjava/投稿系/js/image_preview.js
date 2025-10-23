@@ -61,8 +61,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const maxImages = isPremium ? 6 : 3;
     maxImagesCountSpan.textContent = maxImages;
 
-    // --- イベントリスナー --- (ここから下のコードは変更ありません)
-
     // [追加]ボタンのクリックイベント
     addButton.addEventListener('click', () => {
         const currentInputs = imageInputContainer.querySelectorAll('.image-input');
