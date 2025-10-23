@@ -1,55 +1,50 @@
+// forum_detail.js
 'use strict';
-
 document.addEventListener('DOMContentLoaded', async () => {
+    // header.jsで初期化済みのsupabaseクライアントをグローバルスコープから取得
 
     // --- HTML要素の取得 ---
     const postContainer = document.getElementById('post-detail-container');
     const commentFormContainer = document.getElementById('comment-form-container');
     const commentListContainer = document.getElementById('comment-list-container');
 
-    // --- 1. グローバル変数の定義 ---
+    // --- 1. URLから投稿IDを取得 ---
     const urlParams = new URLSearchParams(window.location.search);
     const forumId = parseInt(urlParams.get('id'));
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    const currentUser = session?.user;
 
-    // --- 2. 初期化処理の開始 ---
     if (!forumId) {
         postContainer.innerHTML = '<h1>無効な投稿IDです。</h1>';
         return;
     }
 
+    // --- 2. ログイン状態を取得 ---
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    const currentUser = session?.user;
+
+
     try {
-        // --- 3. 必要なデータを並行して取得 ---
-        let isPremium = false;
-        let isBookmarked = false;
-
-        // ログインしている場合のみ、プレミアム情報とブックマーク情報を取得
-        if (currentUser) {
-            const [profileRes, bookmarkRes] = await Promise.all([
-                supabaseClient.from('users').select('premium_expires_at').eq('id', currentUser.id).single(),
-                supabaseClient.from('bookmark').select('*').eq('user_id', currentUser.id).eq('post_id', forumId).maybeSingle()
-            ]);
-
-            if (profileRes.data && profileRes.data.premium_expires_at && new Date(profileRes.data.premium_expires_at) > new Date()) {
-                isPremium = true;
-            }
-            if (bookmarkRes.data) {
-                isBookmarked = true;
-            }
-        }
-
-        // 投稿関連のデータを取得
-        const [postRes, tagsRes, imagesRes, commentsRes] = await Promise.all([
-            supabaseClient.from('forums').select('*, users!forums_user_id_auth_fkey(user_name)').eq('forum_id', forumId).single(),
+        // --- 3. 投稿データを取得 ---
+        const [
+            postResponse,
+            tagsResponse,
+            imagesResponse,
+            commentsResponse
+        ] = await Promise.all([
+            supabaseClient.from('forums').select('*,users!user_id_auth(user_name)').eq('forum_id', forumId).single(),
             supabaseClient.from('tag').select('tag_dic(tag_name)').eq('forum_id', forumId),
             supabaseClient.from('forum_images').select('image_url').eq('post_id', forumId).order('display_order'),
-            supabaseClient.from('comments').select('*, users(user_name)').eq('forum_id', forumId).order('created_at', { ascending: false })
+            supabaseClient.from('comments').select(`
+                comment_id,
+                comment_text,
+                created_at,
+                users!user_id_auth(user_name)
+                `).eq('forum_id', forumId).order('created_at', { ascending: false })
         ]);
+        console.log(postResponse.error);
+        console.log(postResponse.data);
+        if (postResponse.error || !postResponse.data) throw new Error('投稿が見つからないか、取得に失敗しました。');
 
-        if (postRes.error || !postRes.data) throw new Error('投稿が見つからないか、取得に失敗しました。');
-        
-        const post = postRes.data;
+        const post = postResponse.data;
 
         // --- 4. アクセス制御 ---
         const isOwner = currentUser && post.user_id_auth === currentUser.id;
@@ -57,12 +52,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             throw new Error('この投稿の公開期限は終了しました。');
         }
 
-        // --- 5. ページを描画 ---
-        renderPost(post, tagsRes.data || [], imagesRes.data || [], isPremium, isBookmarked, isOwner);
-        renderComments(commentsRes.data || []);
+        // --- 5. 取得したデータでページを描画 ---
+        renderPost(
+            post,
+            tagsResponse.data || [],
+            imagesResponse.data || []
+        );
+        renderComments(commentsResponse.data || []);
 
         if (currentUser) {
-            renderCommentForm();
+            renderCommentForm(isOwner);
         } else {
             commentFormContainer.innerHTML = `<p><a href="../../ログイン系/html/login.html">ログイン</a>してコメントを投稿する</p>`;
         }
@@ -73,96 +72,189 @@ document.addEventListener('DOMContentLoaded', async () => {
         commentListContainer.style.display = 'none';
     }
 
-    // ==================================================
-    //  ヘルパー関数セクション
-    // ==================================================
+    // --------------------------------------------------
+    //  描画・イベント処理用のヘルパー関数
+    // --------------------------------------------------
 
-    function renderPost(post, tags, images, isPremium, isBookmarked, isOwner) {
+    /**
+     * 投稿内容を描画する
+     */
+
+    function renderPost(post, tags, images) {
         const remainingTimeHTML = timeLeft(post.delete_date);
         const timeAgoHTML = timeAgo(post.created_at);
 
+        // タグのHTMLを生成
         const tagsHTML = tags.map(tag => `<a href="../../メイン系/html/search.html?keyword=${encodeURIComponent(tag.tag_dic.tag_name)}&type=tag" class="tag-link">#${escapeHTML(tag.tag_dic.tag_name)}</a>`).join(' ');
-        const imagesHTML = images.map(image => `<div class="post-image-wrapper"><img src="${image.image_url}" alt="投稿画像" class="post-image"></div>`).join('');
-        
-        let authorHTML = escapeHTML(post.users?.user_name || '不明');
+
+        // 画像のHTMLを生成
+        const imagesHTML = images.map(image =>
+            `<div class="post-image-wrapper"><img src="${image.image_url}" alt="投稿画像" class="post-image"></div>`
+        ).join('');
+
+        let authorHTML = '';
+        const authorName = escapeHTML(post.users?.user_name || '不明');
         if (currentUser && post.user_id_auth !== currentUser.id) {
-            authorHTML = `<a href="user_posts.html?id=${post.user_id_auth}">${authorHTML}</a>`;
+            authorHTML = `<a href="user_posts.html?id=${post.user_id_auth}">${authorName}</a>`;
+        } else {
+            authorHTML = authorName;
         }
-        
+
+        // ★ isOwner 変数を関数の中から見えるように取得
+        const isOwner = currentUser && post.user_id_auth === currentUser.id;
+
+        // ★ 編集・削除ボタン用のHTMLを生成
         let ownerButtonsHTML = '';
         if (isOwner) {
             ownerButtonsHTML = `
                 <div class="post-owner-actions">
-                    <a href="forum_input.html?edit_id=${post.forum_id}" class="action-button edit-button">編集</a>
-                    <button type="button" id="delete-post-button" class="action-button delete-button">削除</button>
-                </div>`;
-        }
-        
-        let bookmarkButtonHTML = '';
-        if (isPremium) {
-            const buttonText = isBookmarked ? 'ブックマーク解除' : 'ブックマークに追加';
-            const buttonClass = isBookmarked ? 'action-button delete-button' : 'action-button edit-button';
-            bookmarkButtonHTML = `
-                <div class="bookmark-action">
-                    <button type="button" id="bookmark-button" class="${buttonClass}" data-bookmarked="${isBookmarked}">${buttonText}</button>
-                </div>`;
+                    <a href="forum_input.html?edit_id=${post.forum_id}" class="edit-button">編集</a>
+                    <button type="button" id="delete-post-button" class="delete-button">削除</button>
+                </div>
+            `;
         }
 
         postContainer.innerHTML = `
-            ${ownerButtonsHTML}
-            ${bookmarkButtonHTML}
+            ${ownerButtonsHTML} <!-- ★ ここにボタンを追加 -->
             <h1>${escapeHTML(post.title)}</h1>
-            <p class="post-meta">投稿者: ${authorHTML}</p>
+            <p class="post-meta">投稿者:${authorHTML} </p>
             <p class="post-meta">投稿日時: ${timeAgoHTML}</p>
             <div class="post-images-container">${imagesHTML}</div>
             <div class="post-content">${nl2br(post.text)}</div>
             <div class="post-tags">${tagsHTML}</div>
-            ${remainingTimeHTML}`;
-            
-        // イベントリスナーを設定
-        if (isOwner) document.getElementById('delete-post-button').addEventListener('click', () => handleDeletePost(post.forum_id));
-        if (isPremium) document.getElementById('bookmark-button').addEventListener('click', handleBookmarkToggle);
-    }
+            ${remainingTimeHTML}
+        `; 
 
-    function renderCommentForm() { /* ...変更なし... */ }
-    async function handleCommentSubmit(event) { /* ...変更なし... */ }
-    async function fetchAndRenderComments() { /* ...変更なし... */ }
-    function renderComments(comments) { /* ...変更なし... */ }
+        // 削除ボタンにイベントリスナーを設定
+        if (isOwner) {
+            document.getElementById('delete-post-button').addEventListener('click', () => {
+                // 削除処理
+                /**
+                 * 投稿を削除する関数
+                 * @param {number} forumId - 削除する投稿のID
+                 */
+                async function handleDeletePost(forumId) {
+                    // ユーザーに最終確認
+                    if (!confirm('この投稿を本当に削除しますか？\nこの操作は元に戻せません。')) {
+                        return; // キャンセルされたら何もしない
+                    }
 
-    async function handleDeletePost(forumIdToDelete) {
-        if (!confirm('この投稿を本当に削除しますか？\nこの操作は元に戻せません。')) return;
-        try {
-            const { error } = await supabaseClient.rpc('delete_forum_with_related_data', { forum_id_param: forumIdToDelete });
-            if (error) throw error;
-            alert('投稿を削除しました。');
-            window.location.href = '../../メイン系/html/index.html';
-        } catch (error) {
-            console.error('削除エラー:', error);
-            alert(`投稿の削除に失敗しました: ${error.message}`);
+                    try {
+                        // ★ SupabaseのRPCで、削除用のデータベース関数を呼び出す
+                        //    (この方が、関連データをまとめて削除できて安全)
+                        const { error } = await supabaseClient.rpc('delete_forum_with_related_data', {
+                            forum_id_param: forumId
+                        });
+
+                        if (error) {
+                            // 削除中にDBエラーが発生した場合
+                            throw error;
+                        }
+
+                        // 削除成功
+                        alert('投稿を削除しました。');
+                        window.location.href = '../../メイン系/html/index.html'; // ホームページにリダイレクト
+
+                    } catch (error) {
+                        console.error('削除エラー:', error);
+                        alert(`投稿の削除に失敗しました: ${error.message}`);
+                    }
+                }
+                handleDeletePost(post.forum_id);
+            });
         }
     }
-    
-    async function handleBookmarkToggle(event) {
-        const button = event.target;
-        const isCurrentlyBookmarked = button.dataset.bookmarked === 'true';
-        try {
-            if (isCurrentlyBookmarked) {
-                // ブックマークを削除
-                const { error } = await supabaseClient.from('bookmark').delete().eq('user_id', currentUser.id).eq('post_id', forumId);
-                if (error) throw error;
-            } else {
-                // ブックマークを追加
-                const { error } = await supabaseClient.from('bookmark').insert({ user_id: currentUser.id, post_id: forumId });
-                if (error) throw error;
-            }
 
-            const newIsBookmarked = !isCurrentlyBookmarked;
-            button.dataset.bookmarked = newIsBookmarked;
-            button.textContent = newIsBookmarked ? 'ブックマーク解除' : 'ブックマークに追加';
-            button.className = newIsBookmarked ? 'action-button delete-button' : 'action-button edit-button';
-        } catch (error) {
-            console.error('ブックマーク操作エラー:', error);
-            alert('ブックマーク操作に失敗しました。');
+    /**
+     * コメントフォームを描画し、イベントを設定する
+     */
+
+    function renderCommentForm() {
+
+        commentFormContainer.innerHTML = `
+            <form id="comment-form">
+                <textarea name="comment_text" placeholder="コメントを入力..." required></textarea>
+                <button type="submit">コメントを投稿する</button>
+            </form>
+        `;
+
+        document.getElementById('comment-form').addEventListener('submit', handleCommentSubmit);
+
+    }
+
+    /**
+     * コメント投稿処理             
+     */
+
+    async function handleCommentSubmit(event) {
+        event.preventDefault();
+        const commentText = event.target.querySelector('textarea').value.trim();
+        if (!commentText) return;
+
+        const { error } = await supabaseClient
+            .from('comments')
+            .insert({
+                forum_id: forumId,
+                user_id_auth: currentUser.id,// AuthのIDを紐付け
+                comment_text: commentText
+            })
+        if (error) {
+            alert('コメントの投稿に失敗しました:' + error.message);
+        } else {
+            // 投稿成功後、コメント欄をリフレッシュ
+            event.target.querySelector('textarea').value = '';
+            await fetchAndRenderComments();
+        }
+    }
+
+    /**
+     * コメント一覧を取得して描画する
+     */
+    async function fetchAndRenderComments() {
+        const {
+            data: comments, error
+        } = await supabaseClient
+            .from('comments')
+            .select(`
+        comment_id,
+        comment_text,
+        created_at,
+        users ( user_name )
+    `)
+            .eq('forum_id', forumId)
+            .order('created_at', { ascending: false });
+
+
+        if (error) {
+            commentListContainer.innerHTML = '<p>コメントの読み込みに失敗しました。</p>';
+            return;
+        }
+        renderComments(comments);
+    }
+
+    /**
+     * コメント一覧を描画する
+     */
+
+    function renderComments(comments) {
+        console.log(comments);
+        if (comments && comments.length > 0) {
+
+            commentListContainer.innerHTML = comments.map(
+                comment => {
+                    const commentTimeAgo = timeAgo(comment.created_at);
+
+                    return `
+                        <div class="comment-item">
+                            <strong>${escapeHTML(comment.users?.user_name || '不明')}:</strong>
+                            <p>${nl2br(comment.comment_text)}</p>
+                            <small>${commentTimeAgo}</small>
+                        </div>
+                    `;
+                }
+            ).join('');
+        } else {
+            commentListContainer.innerHTML = "<p>まだコメントはありません。</p>"
         }
     }
 });
