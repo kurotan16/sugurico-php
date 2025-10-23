@@ -23,6 +23,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+
+    // --- 1. 編集モードか、新規モードかを判断 ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('edit_id');
+    const isEditMode = !!editId;
+
+    let currentUser;
+
+    async function initializePage() {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) {
+            alert('この操作にはログインが必要です');//早急に対処せよ　2025年10月23日　福田
+            window.location.href = '../../ログイン系/html/login.html';
+        }
+        currentUser = user;
+
+        if (isEditMode) {
+            
+        } else {
+            
+        }
+    }
+
     // --- フォーム送信イベント ---
     postForm.addEventListener('submit', async (event) => {
         event.preventDefault();
