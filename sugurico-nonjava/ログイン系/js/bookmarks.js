@@ -119,16 +119,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    function renderPagination(totalPosts, currentPage, itemsPerPage) {
+    function renderPagination(totalPages, currentPage, itemsPerPage) {
         // mypage.js の renderPagination とほぼ同じ
-        const totalPosts = Math.ceil(totalTtems / itemsPerPage);
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
         if (totalPages <= 1) {
             paginationContainer.innerHTML = '';
             return;
         }
 
         let paginationHTML = '';
-
         // 前のページリンク
         if (currentPage > 1) paginationHTML += `<a href="?page=${currentPage - 1}">≪ 前へ</a>`;
         for (let i = 1; i <= totalPages; i++) {
@@ -143,15 +142,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     postsListContainer.addEventListener('click', async (event) => {
         if (event.target.classList.contains('delete-button')) {
             const postId = event.target.dataset.postId;
-            if (confirm('この投稿を削除してもよろしいですか？')) {
-                const { error } = await supabaseClient.rpc('delete_forum_with_related_data', { forum_id_param: postId});
+            if (confirm('この投稿を本当に削除しますか？')) {
+                const { error } = await supabaseClient.rpc('delete_forum_with_related_data', { forum_id_param: postId });
                 if (error) {
-                    alert('投稿の削除中にエラーが発生しました。');
+                    alert('削除に失敗しました。');
                 } else {
-                    alert('投稿が正常に削除されました。');
-                    location.reload(); // ページをリロードして最新の状態を反映
+                    alert('削除しました。');
+                    location.reload(); // 簡単にするためリロード
                 }
             }
         }
     });
+
 });
