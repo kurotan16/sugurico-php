@@ -1,49 +1,50 @@
 'use strict';
 
 document.addEventListener('DOMContentLoaded', async () => {
+
     // --- HTML要素の取得 ---
     const postsListContainer = document.getElementById('bookmarks-list');
     const paginationContainer = document.getElementById('pagination-container');
 
-    // --- 1.ログイン状態とプレミアム状態をチェック ---
+    // --- 1. ログイン状態とプレミアム状態をチェック ---
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (!session) {
-        // ログインしていない場合、ログインページへリダイレクト
-        window.location.href = '../html/login.html';
+        // ログインしていなければ、ログインページにリダイレクト
+        window.location.href = 'login.html';
         return;
     }
     const currentUser = session.user;
 
-    // プレミアム状態をチェック (ブックマーク機能はプレミアム会員限定)
-    const { data: profile } = await supabaseClient.from('users').select('premium_expires_at').eq(' id', currentUser.id).single();
+    // プレミアム状態をチェック（ブックマーク機能はプレミアム限定なので）
+    const { data: profile } = await supabaseClient.from('users').select('premium_expires_at').eq('id', currentUser.id).single();
     const isPremium = profile && profile.premium_expires_at && new Date(profile.premium_expires_at) > new Date();
 
     if (!isPremium) {
         // プレミアム会員でない場合、プレミアム紹介ページへリダイレクト
-        window.location.href = '../html/premium.html';
+        document.querySelector('main').innerHTML = '<h1>アクセス権がありません</h1><p>この機能はプレミアム会員限定です。</p>';
         return;
     }
 
-    // --- 2.ページネーションの準備 ---
+    // --- 2. ページネーションの準備 ---
     const urlParams = new URLSearchParams(window.location.search);
     const currentPage = parseInt(urlParams.get('page')) || 1;
     const postsPerPage = 10;
     const offset = (currentPage - 1) * postsPerPage;
 
-    // --- 3.ブックマークした投稿を取得して表示 ---
+    // --- 3. ブックマークした投稿を取得して表示 ---
     try {
-        postsListContainer.innerHTML = '<p>読み込み中…</p>';
+        postsListContainer.innerHTML = '<p>読み込み中...</p>';
 
         // まず、自分がブックマークした投稿の総件数を取得
-        const { count: totalPosts, error: constError } = await supabaseClient
+        const { count: totalPosts, error: countError } = await supabaseClient
             .from('bookmark')
             .select('*', { count: 'exact', head: true })
             .eq('user_id', currentUser.id);
-        
-        if (constError) throw constError
+
+        if (countError) throw countError;
 
         if (totalPosts === 0) {
-            postsListContainer.innerHTML = '<p>まだブックマークした投稿はありません。</p>';
+            postsListContainer.innerHTML = '<p>ブックマークされた投稿はまだありません。</p>';
             return;
         }
 
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 created_at,
                 forums (
                     *,
-                    users!forums_user_id_fkey ( username ),
+                    users!forums_user_id_auth_fkey ( user_name ),
                     forum_images ( image_url )
                 )
             `)
@@ -65,15 +66,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (postsError) throw postsError;
 
-        // --- 4.取得したデータでHTMLを生成・表示 ---
+        // --- 4. 取得したデータでHTMLを生成・表示 ---
         postsListContainer.innerHTML = posts.map(item => renderPostHTML(item.forums)).join('');
 
-        // --- 5.ページネーションの描画 ---
+        // --- 5. ページネーションを描画 ---
         renderPagination(totalPosts, currentPage, postsPerPage);
 
     } catch (error) {
         console.error('ブックマークの取得エラー:', error);
-        postsListContainer.innerHTML = '<p>ブックマークの読み込み中にエラーが発生しました。</p>';
+        postsListContainer.innerHTML = `<p>ブックマークの読み込み中にエラーが発生しました。</p>`;
     }
 
     // ==================================================
