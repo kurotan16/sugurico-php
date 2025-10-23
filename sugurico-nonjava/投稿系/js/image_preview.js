@@ -24,7 +24,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     /**
-     * ▼▼▼ ここからが変更箇所 ▼▼▼
      * Supabaseに問い合わせてプレミアム状態を判定する関数
      */
     async function checkPremiumStatus() {
@@ -61,10 +60,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const isPremium = await checkPremiumStatus();
     const maxImages = isPremium ? 6 : 3;
     maxImagesCountSpan.textContent = maxImages;
-    /**
-     * ▲▲▲ 変更箇所ここまで ▲▲▲
-     */
-
 
     // --- イベントリスナー --- (ここから下のコードは変更ありません)
 
