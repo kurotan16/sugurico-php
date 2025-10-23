@@ -90,31 +90,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         const timeAgoString = timeAgo(post.created_at);
 
         // 自分投稿かどうかで編集・削除ボタンの表示を切り替え
-        let actionHTML = '';
+        let actionsHTML = '';
         if (currentUser.id === post.user_id_auth) {
-            actionHTML = `
+            actionsHTML = `
                 <div class="post-item-actions">
                     <a href="../../投稿系/html/forum_input.html?edit_id=${post.forum_id}" class="action-button edit-button">編集</a>
-                    <button type="button" class="action-button edit-button" data-post-id="${post.forum_id}">削除</button>
-                </div>
-            `;
+                    <button type="button" class="action-button delete-button" data-post-id="${post.forum_id}">削除</button>
+                </div>`;
         }
 
         return `
             <article class="post-item">
-                <a href="../../投稿系/html/forum_drtail.html?id=${post.forum_id}" class="post-item-link">
-                    <div class="post-item-main ${thumbnaiLHTML ? 'has-thumbnail' : ''}">
+                <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-item-link">
+                    <div class="post-item-main ${thumbnailHTML ? 'has-thumbnail' : ''}">
                         ${thumbnailHTML}
                         <div class="post-item-content">
-                            <h3>${escapeHTML}(post.title) <small style="color:gray;">${timeAgoString}</small></h3>
+                            <h3>${escapeHTML(post.title)} <small style="color:gray;">${timeAgoString}</small></h3>
                             <p>${nl2br(post.text.length > 50 ? post.text.slice(0, 50) + '...' : post.text)}</p>
-                            <small>投稿者: ${escapeHTML(post.users.username)}</small>
+                            <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
                             <br>
-                            <small style="color:gray">${remainingTime}</small>
+                            <small style="color:gray;">${remainingTime}</small>
                         </div>
                     </div>
                 </a>
-                ${actionHTML}
+                ${actionsHTML}
             </article>
         `;
     }
