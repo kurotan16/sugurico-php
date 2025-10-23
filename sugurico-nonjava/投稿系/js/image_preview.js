@@ -1,7 +1,8 @@
 // image_preview.js
 'use strict';
 
-document.addEventListener('DOMContentLoaded', () => {
+// DOMContentLoadedのコールバックを「async」関数に変更します
+document.addEventListener('DOMContentLoaded', async () => {
     const imageInputContainer = document.getElementById('image-input-container');
     const addButton = document.getElementById('add-image-button');
     const removeButton = document.getElementById('remove-image-button');
@@ -16,15 +17,56 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
+    // supabaseClientが読み込まれているか確認
+    if (typeof supabaseClient === 'undefined') {
+        console.error('Supabase client is not available. Make sure header.js is loaded.');
+        return;
+    }
+
+    /**
+     * ▼▼▼ ここからが変更箇所 ▼▼▼
+     * Supabaseに問い合わせてプレミアム状態を判定する関数
+     */
+    async function checkPremiumStatus() {
+        // 1. 現在のログインユーザー情報を取得
+        const { data: { user } } = await supabaseClient.auth.getUser();
+
+        // 2. ログインしていなければプレミアムではない
+        if (!user) {
+            return false;
+        }
+
+        // 3. 'premium'テーブルからユーザーの情報を取得
+        const { data: premium, error } = await supabaseClient
+            .from('premium')
+            .select('status, limit_date')
+            .eq('id', user.id)
+            .single(); // ユーザーIDが一致するレコードを1件だけ取得
+
+        if (error || !premium) {
+            // レコードが存在しない、または取得時にエラーが発生した場合はプレミアムではない
+            return false;
+        }
+
+        // 4. ステータスが 'active' で、かつ有効期限が切れていないかチェック
+        const isActive = premium.status === 'active';
+        const isNotExpired = new Date(premium.limit_date) > new Date();
+
+        return isActive && isNotExpired;
+    }
+
     let currentObjectUrls = [];
 
-    // ★ プレミアム機能の判定（仮）
-    // 実際には、ログインユーザーの情報を取得して判定します
-    const isPremium = false;
+    // ★ プレミアム機能の判定を、Supabaseに問い合わせる関数呼び出しに変更
+    const isPremium = await checkPremiumStatus();
     const maxImages = isPremium ? 6 : 3;
     maxImagesCountSpan.textContent = maxImages;
+    /**
+     * ▲▲▲ 変更箇所ここまで ▲▲▲
+     */
 
-    // --- イベントリスナー ---
+
+    // --- イベントリスナー --- (ここから下のコードは変更ありません)
 
     // [追加]ボタンのクリックイベント
     addButton.addEventListener('click', () => {
