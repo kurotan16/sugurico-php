@@ -119,8 +119,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
     }
 
-    function renderPagination(totalPages, currentPage, itemsPerPage) {
-        // mypage.js の renderPagination とほぼ同じ
+function renderPagination(totalItems, currentPage, itemsPerPage) {
+        // ★ 変数名を totalPages に修正
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         if (totalPages <= 1) {
             paginationContainer.innerHTML = '';
@@ -128,13 +128,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         let paginationHTML = '';
+
         // 前のページリンク
-        if (currentPage > 1) paginationHTML += `<a href="?page=${currentPage - 1}">≪ 前へ</a>`;
-        for (let i = 1; i <= totalPages; i++) {
-            if (i === currentPage) paginationHTML += `<span class="current-page">${i}</span>`;
-            else paginationHTML += `<a href="?page=${i}">${i}</a>`;
+        if (currentPage > 1) {
+            paginationHTML += `<a href="?page=${currentPage - 1}">« 前へ</a>`;
         }
-        if (currentPage < totalPages) paginationHTML += `<a href="?page=${currentPage + 1}">次へ ≫</a>`;
+
+        // ページ番号リンク
+        for (let i = 1; i <= totalPages; i++) {
+            if (i === currentPage) {
+                paginationHTML += `<span class="current-page">${i}</span>`;
+            } else {
+                paginationHTML += `<a href="?page=${i}">${i}</a>`;
+            }
+        }
+        
+        // 次のページリンク
+        if (currentPage < totalPages) {
+            paginationHTML += `<a href="?page=${currentPage + 1}">次へ »</a>`;
+        }
+
         paginationContainer.innerHTML = paginationHTML;
     }
 
