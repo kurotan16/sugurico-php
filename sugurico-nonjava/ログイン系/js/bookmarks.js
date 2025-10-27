@@ -15,30 +15,13 @@ if (!session) {
 }
 const currentUser = session.user;
 
-async function checkPremiumStatus() {
-    if (!currentUser) return false;
+    // ★ 共通関数を呼び出すように変更
+    const isPremium = await isCurrentUserPremium();
 
-    const { data: premium, error } = await supabaseClient
-        .from('premium') // ★ 'premium' テーブルを参照
-        .select('status, limit_date') // ★ 'status' と 'limit_date' を取得
-        .eq('id', currentUser.id)
-        .single();
-
-    if (error || !premium) return false;
-
-    const isActive = premium.status === 'active';
-    const isNotExpired = new Date(premium.limit_date) > new Date();
-
-    return isActive && isNotExpired;
-}
-
-const isPremium = await checkPremiumStatus(); // 作成した関数で判定
-
-if (!isPremium) {
-    // プレミアム会員でない場合、メッセージを表示
-    document.querySelector('main').innerHTML = '<h1>アクセス権がありません</h1><p>この機能はプレミアム会員限定です。</p>';
-    return;
-}
+    if (!isPremium) {
+        document.querySelector('main').innerHTML = '<h1>アクセス権がありません</h1><p>この機能はプレミアム会員限定です。</p>';
+        return;
+    }
 
     // --- 2. ページネーションの準備 ---
     const urlParams = new URLSearchParams(window.location.search);
