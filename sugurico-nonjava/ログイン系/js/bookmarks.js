@@ -2,28 +2,43 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // --- HTML要素の取得 ---
-    const postsListContainer = document.getElementById('bookmarks-list');
-    const paginationContainer = document.getElementById('pagination-container');
+// --- HTML要素の取得 ---
+const postsListContainer = document.getElementById('bookmarks-list');
+const paginationContainer = document.getElementById('pagination-container');
 
-    // --- 1. ログイン状態とプレミアム状態をチェック ---
-    const { data: { session } } = await supabaseClient.auth.getSession();
-    if (!session) {
-        // ログインしていなければ、ログインページにリダイレクト
-        window.location.href = 'login.html';
-        return;
-    }
-    const currentUser = session.user;
+// --- 1. ログイン状態をチェック ---
+const { data: { session } } = await supabaseClient.auth.getSession();
+if (!session) {
+    // ログインしていなければ、ログインページにリダイレクト
+    window.location.href = 'login.html';
+    return;
+}
+const currentUser = session.user;
 
-    // プレミアム状態をチェック（ブックマーク機能はプレミアム限定なので）
-    const { data: profile } = await supabaseClient.from('users').select('premium_expires_at').eq('id', currentUser.id).single();
-    const isPremium = profile && profile.premium_expires_at && new Date(profile.premium_expires_at) > new Date();
+async function checkPremiumStatus() {
+    if (!currentUser) return false;
 
-    if (!isPremium) {
-        // プレミアム会員でない場合、プレミアム紹介ページへリダイレクト
-        document.querySelector('main').innerHTML = '<h1>アクセス権がありません</h1><p>この機能はプレミアム会員限定です。</p>';
-        return;
-    }
+    const { data: premium, error } = await supabaseClient
+        .from('premium') // ★ 'premium' テーブルを参照
+        .select('status, limit_date') // ★ 'status' と 'limit_date' を取得
+        .eq('id', currentUser.id)
+        .single();
+
+    if (error || !premium) return false;
+
+    const isActive = premium.status === 'active';
+    const isNotExpired = new Date(premium.limit_date) > new Date();
+
+    return isActive && isNotExpired;
+}
+
+const isPremium = await checkPremiumStatus(); // 作成した関数で判定
+
+if (!isPremium) {
+    // プレミアム会員でない場合、メッセージを表示
+    document.querySelector('main').innerHTML = '<h1>アクセス権がありません</h1><p>この機能はプレミアム会員限定です。</p>';
+    return;
+}
 
     // --- 2. ページネーションの準備 ---
     const urlParams = new URLSearchParams(window.location.search);
