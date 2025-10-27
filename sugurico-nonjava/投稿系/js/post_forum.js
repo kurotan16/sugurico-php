@@ -65,13 +65,50 @@ document.addEventListener('DOMContentLoaded', async () => {
             // --- フォームに既存のデータを設定 ---
             titleInput.value = post.title;
             textInput.value = post.text;
+            // 1. 公開期限の設定
+            if (post.delete_date) {
+                // (この部分は、DBの保存形式と<select>のvalueをどう合わせるかで実装が変わります)
+                // 例: expireSelect.value = '7days';
+            } else {
+                expireSelect.value = 'permanent';
+            }
 
-            // (公開期限、タグ、画像の初期表示もここで行う)
-            // ...
+
+            // 2. タグの表示      
+            const tagContainer = document.getElementById('tag-container');// 2025年10月27日　not defined
+            const initialTagInput = tagContainer.querySelector('.tag-input-wrapper');
+            if (post.tag && post.tag.length > 0) {
+                // 最初の入力欄に1つ目のタグを設定
+                initialTagInput.querySelector('input').value = post.tag[0].tag_dic.tag_name;
+
+                // 2つ目以降のタグの入力欄を動的に追加
+                for (let i = 0; i < post.tag.length; i++) {
+                    addTagInput(post.tag[i].tag_dic.tag_name);
+                }
+            }
+
+            // 3. 画像のプレビュー表示
+
+            const imageInputContainer = document.getElementById('image-input-container');
+            const perviewContainer = document.getElementById('image-preview-container');
+
+            if (post.forum_images && post.forum_images.length > 0) {
+                // 既存の画像はプレビューだけ表示し、新しいファイル選択はさせないのが一般的
+                perviewContainer.innerHTML = post.forum_images.map(image => `
+                    
+                    <div class="image-preview-wrapper existing-image">
+                                            <img src="${image.image_url}" alt="既存の画像">
+                                            <button type="button" class="delete-existing-image-button" data-image-id="${image.image_id}">×</button>
+                                        </div>
+                    `).join('');
+                // (既存画像の削除ボタンにイベントリスナーを設定する処理も必要)
+            }
+
+
         } catch (error) {
             console.error('編集データの読み込みエラー:', error);
             alert('データの読み込みに失敗しました。メインページに戻ります。');
-            window.location.href = '../../メイン系/html/index';
+ //           window.location.href = '../../メイン系/html/index.html';
         }
 
     }
