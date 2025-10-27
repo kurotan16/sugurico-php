@@ -2,18 +2,20 @@
 
 document.addEventListener('DOMContentLoaded', async () => {
 
-// --- HTML要素の取得 ---
-const postsListContainer = document.getElementById('bookmarks-list');
-const paginationContainer = document.getElementById('pagination-container');
+    // --- HTML要素の取得 ---
+    const postsListContainer = document.getElementById('bookmarks-list');
+    const paginationContainer = document.getElementById('pagination-container');
 
-// --- 1. ログイン状態をチェック ---
-const { data: { session } } = await supabaseClient.auth.getSession();
-if (!session) {
-    // ログインしていなければ、ログインページにリダイレクト
-    window.location.href = 'login.html';
-    return;
-}
-const currentUser = session.user;
+    // --- 1. ログイン状態をチェック ---
+    const { data: { session } } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+        // ログインしていなければ、ログインページにリダイレクト
+        window.location.href = 'login.html';
+        return;
+    }
+
+    const currentUser = session.user;
 
     // ★ 共通関数を呼び出すように変更
     const isPremium = await isCurrentUserPremium();
@@ -117,7 +119,7 @@ const currentUser = session.user;
         `;
     }
 
-function renderPagination(totalItems, currentPage, itemsPerPage) {
+    function renderPagination(totalItems, currentPage, itemsPerPage) {
         // ★ 変数名を totalPages に修正
         const totalPages = Math.ceil(totalItems / itemsPerPage);
         if (totalPages <= 1) {
