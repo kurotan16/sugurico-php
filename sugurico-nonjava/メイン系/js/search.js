@@ -44,8 +44,13 @@ document.addEventListener('DOMContentLoaded', () => {
         paginationContainer.innerHTML = '';
 
         try {
+            // ログインユーザー情報を取得する処理を追加
+            const {data: { user }} = await supabaseClient.auth.getUser();
+            const currentUserId = user ? user.id : null; // 未ログイン時はnull
+
             //  フォームから現在の検索条件を取得
             const searchParams = {
+                current_user_id_param: currentUserId,
                 keyword_param: keywordInput.value.trim(),
                 author_param: authorInput.value.trim(),
                 tag_param: tagInput.value.trim(),
