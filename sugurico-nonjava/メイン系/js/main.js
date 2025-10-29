@@ -3,28 +3,41 @@
 
 
 // --- ページ読み込み完了時のメイン処理 ---
+// ▼▼▼ async を追加 ▼▼▼
 document.addEventListener('DOMContentLoaded', async () => {
     
     // --- 1. ログイン状態をチェック ---
     const { data: { session } } = await supabaseClient.auth.getSession();
 
+    // ▼▼▼ ブロックユーザーリストをここで一度だけ取得する ▼▼▼
+    let blockedUserIds = [];
+    if (session) {
+        const { data: blockedUsers, error } = await supabaseClient
+            .from('blocks')
+            .select('blocked_user_id')
+            .eq('blocker_user_id', session.user.id);
+
+        if (error) {
+            console.error('ブロックリストの取得に失敗:', error);
+        } else {
+            blockedUserIds = blockedUsers.map(b => b.blocked_user_id);
+        }
+    }
+
     if (session) {
         // 【ログインしている場合の処理】
-        console.log("ログイン済み:", session.user);
-        // 「あなたの投稿」セクションと、投稿ボタンを表示
         document.getElementById('my-posts-section').style.display = 'block';
-        document.getElementById('new-post-button').style.display = 'flex'; // flexはfloating-buttonのCSSに合わせる
+        document.getElementById('new-post-button').style.display = 'flex';
 
-        // 自分の投稿を取得して表示
-        fetchAndDisplayPosts('my-posts-list', session.user.id);
-        // 皆さんの投稿（自分を除く）を取得して表示
-        fetchAndDisplayPosts('all-posts-list', null, session.user.id);
+        // 自分の投稿を取得して表示 (ブロックリストは不要)
+        fetchAndDisplayPosts('my-posts-list', session.user.id, null, []);
+        // 皆さんの投稿（自分を除く）を取得して表示 (ブロックリストを渡す)
+        fetchAndDisplayPosts('all-posts-list', null, session.user.id, blockedUserIds);
 
     } else {
         // 【ログインしていない場合の処理】
-        console.log("未ログイン");
-        // 皆さんの投稿（すべて）を取得して表示
-        fetchAndDisplayPosts('all-posts-list', null);
+        // 皆さんの投稿（すべて）を取得して表示 (ブロックリストは空)
+        fetchAndDisplayPosts('all-posts-list', null, null, []);
     }
 });
 
@@ -34,13 +47,14 @@ document.addEventListener('DOMContentLoaded', async () => {
  * @param {string} containerId - 投稿を表示するHTML要素のID
  * @param {string|null} userId - 特定のユーザーID（指定しない場合はnull）
  * @param {string|null} excludeUserId - 除外するユーザーID（指定しない場合はnull）
+ * @param {string[]} blockedUserIds - ブロック対象のユーザーIDの配列
  */
-async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = null) {
+// ▼▼▼ 引数に blockedUserIds を追加 ▼▼▼
+async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = null, blockedUserIds = []) {
     const container = document.getElementById(containerId);
     if (!container) return;
     
     try {
-        // SupabaseのDB APIを呼び出す
         let query = supabaseClient
             .from('forums')
             .select(`
@@ -52,49 +66,40 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
                 users!user_id_auth(user_name),
                 forum_images ( image_url ) 
             `)
-            .or('delete_date.is.null,delete_date.gt.now()') // 公開期限のチェック
-            .order('forum_id', { ascending: false }) // 新しい順
+            .or('delete_date.is.null,delete_date.gt.now()')
+            .order('forum_id', { ascending: false })
             .limit(3);
 
-        // 条件に応じてクエリを組み立て
         if (userId) {
-            query = query.eq('user_id_auth', userId); // 自分の投稿
+            query = query.eq('user_id_auth', userId);
         }
         if (excludeUserId) {
-            query = query.not('user_id_auth', 'eq', excludeUserId); // 自分以外の投稿
+            query = query.not('user_id_auth', 'eq', excludeUserId);
+        }
+
+        if (blockedUserIds.length > 0) {
+            query = query.not('user_id_auth', 'in', `(${blockedUserIds.join(',')})`);
         }
 
         const { data: posts, error } = await query;
         
         if (error) throw error;
 
-        console.log("Supabaseから取得した投稿データ:", posts); // デバッグ用ログ
-
-        // --- HTMLの組み立て ---
+        // --- HTMLの組み立て --- (ここから下は変更なし)
         if (posts.length > 0) {
             container.innerHTML = posts.map(post => {
-                // ▼▼▼ ここからHTML生成部分を修正 ▼▼▼
-
-                // 1. 画像サムネイルのHTMLを準備
                 let thumbnailHTML = '';
-                // もし画像があり、その配列が空でなければ
                 if (post.forum_images && post.forum_images.length > 0) {
-                    // 1枚目の画像のURLを使ってimgタグを生成
                     thumbnailHTML = `<div class="post-item-thumbnail"><img src="${post.forum_images[0].image_url}" alt="投稿画像"></div>`;
                 }
-
-                // 2. 閲覧期限のHTMLを準備 (ここは既存のコード)
                 const remainingTime = timeLeft(post.delete_date);
                 const timeAgoString = timeAgo(post.created_at);
 
-                // 3. 最終的なHTMLを組み立てる
-                // post-itemにクラスを追加し、thumbnailHTMLを配置
                 return `
                     <a href="../../投稿系/html/forum_detail.html?id=${post.forum_id}" class="post-link">
                         <article class="post-item ${thumbnailHTML ? 'has-thumbnail' : ''}">
-                            
                             <div class="post-item-content">
-                            <h3>${escapeHTML(post.title)} <small style="color:gray;">${timeAgoString}</small> </h3>
+                                <h3>${escapeHTML(post.title)} <small style="color:gray;">${timeAgoString}</small> </h3>
                                 <p>${escapeHTML(post.text.length > 20 ? post.text.slice(0, 20) + '...' : post.text).replace(/\n/g, '<br>')}</p>
                                 <small>投稿者: ${escapeHTML(post.users.user_name)}</small>
                                 <br>
@@ -114,5 +119,3 @@ async function fetchAndDisplayPosts(containerId, userId = null, excludeUserId = 
         container.innerHTML = '<p>投稿の読み込み中にエラーが発生しました。</p>';
     }
 }
-
-
