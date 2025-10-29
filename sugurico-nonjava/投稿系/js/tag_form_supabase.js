@@ -1,7 +1,10 @@
 //tag_form_supabase.js
 'use strict';
 
-
+const tagContainer = document.getElementById('tag-container');
+const insertButton = document.getElementById('insert-tags');
+const deleteButton = document.getElementById('delete-tags');
+const maxTags = 10;
 // 新しいタグ入力欄を追加する関数
 
 function addTagInput(value = '') {
@@ -16,23 +19,34 @@ function addTagInput(value = '') {
     newInput.className = 'tag-input';
 
     wrapper.appendChild(newInput);
-    const buttonContainer = document.getElementById('insert-tags').parentElement;
+
+    const buttonContainer = tagContainer.querySelector('.tag-buttons');
     tagContainer.insertBefore(wrapper, buttonContainer);
 
     newInput.focus();
 
 }
+function showButtons() {
 
+    const wrappers = tagContainer.querySelectorAll('.tag-input-wrapper');
+    insertButton.style.display = 'inline';
+    deleteButton.style.display = 'inline';
+
+    if (wrappers.length === 1) {
+        deleteButton.style.display = 'none';
+    }
+    if (wrappers.length === maxTags) {
+        insertButton.style.display = 'none';
+    }
+}
 document.addEventListener('DOMContentLoaded', () => {
-    const tagContainer = document.getElementById('tag-container');
-    const insertButton = document.getElementById('insert-tags');
-    const deleteButton = document.getElementById('delete-tags');
+
 
     if (!tagContainer || !insertButton || !deleteButton) {
         return;
     }
 
-    const maxTags = 10;
+
 
     showButtons();
 
@@ -81,19 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    function showButtons() {
 
-        const wrappers = tagContainer.querySelectorAll('.tag-input-wrapper');
-        insertButton.style.display = 'inline';
-        deleteButton.style.display = 'inline';
-
-        if (wrappers.length === 1) {
-            deleteButton.style.display = 'none';
-        }
-        if (wrappers.length === maxTags) {
-            insertButton.style.display = 'none';
-        }
-    }
 
 
 });

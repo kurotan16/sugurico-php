@@ -82,8 +82,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 initialTagInput.querySelector('input').value = post.tag[0].tag_dic.tag_name;
 
                 // 2つ目以降のタグの入力欄を動的に追加
-                for (let i = 0; i < post.tag.length; i++) {
+                for (let i = 1; i < post.tag.length; i++) {
                     addTagInput(post.tag[i].tag_dic.tag_name);
+                }
+
+                if (typeof showButtons === 'function') {
+                    showButtons();
                 }
             }
 
@@ -108,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('編集データの読み込みエラー:', error);
             alert('データの読み込みに失敗しました。メインページに戻ります。');
- //           window.location.href = '../../メイン系/html/index.html';
+            //           window.location.href = '../../メイン系/html/index.html';
         }
 
     }
@@ -163,6 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function updatePost() {
+        // --- 1. テキスト関連の情報を更新 ---
         const { error } = await supabaseClient
             .from('forums')
             .update({
@@ -172,6 +177,61 @@ document.addEventListener('DOMContentLoaded', async () => {
             })
             .eq('forum_id', editId);
         if (error) throw error;
+
+        // --- 2. タグを更新 (一度すべて削除してから、再度追加) ---
+        // 2-a. 既存のタグの紐付けを削除
+        await supabaseClient
+            .from('tag')
+            .delete()
+            .eq('forum_id', editId);
+
+        // 2-b. フォームから新しいタグ情報を取得して保存 (createPostと同じロジック)
+
+        const tagInputs = document.querySelectorAll('#tag-container .tag-input');
+        console.log(tagInputs.value);
+        const tags = [
+            ...new Set(
+                Array.from(tagInputs).map(input => input.value.trim()).filter(Boolean)
+            )
+        ];
+        if (tags.length > 0) {
+            await saveTags(editId, tags);
+        }
+
+        // --- 3. 画像を更新 (一度すべて削除してから、再度追加) ---
+        // 3-a. 既存の画像情報をDBから取得
+
+        const { data: existingImages, error: fetchImageError } = await supabaseClient
+            .from('forum_images')
+            .select('image_url')
+            .eq('post_id', editId);
+        if (fetchImageError) throw fetchImageError;
+
+        // 3-b. 既存の画像をStorageから削除
+        if (existingImages && existingImages.length > 0) {
+            const filesToRemove = existingImages.map(img => {
+                // publicUrlからpathを抽出 (例: .../post-images/userid/filename.jpg -> userid/filename.jpg)
+                const path = img.image_url.split('/post-images/')[1];
+                return path;
+            });
+            await supabaseClient.storage.from('post-images').remove(filesToRemove);
+        }
+        // 3-c. 既存の画像のDBレコードを削除 (Storage削除後に行う)
+        await supabaseClient
+            .from('forum_images')
+            .delete()
+            .eq('post_id', editId);
+
+        // 3-d. フォームから新しい画像を取得してアップロード＆保存 (createPostと同じロジック)
+        const imageInputs = imageInputContainer.querySelectorAll('.image-input');
+        const filesToUpload = Array.from(imageInputs).map(
+            input => input.files[0]
+        ).filter(Boolean);
+        if (filesToUpload.length > 0) {
+            const imageUrls = await uploadImages(filesToUpload);
+            await saveImageUrls(editId, imageUrls);
+        }
+
     }
 
     /**
