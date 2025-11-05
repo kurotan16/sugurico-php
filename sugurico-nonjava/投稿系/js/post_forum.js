@@ -10,11 +10,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const titleInput = document.getElementById('titleInput');
     const textInput = document.getElementById('textInput');
     const expireSelect = document.getElementById('expireSelect');
+
+    const premiumExpireArea = document.getElementById('premium-expire-input-area');
+    const premiumExpireInput = document.getElementById('premiumExpireInput');
+    const currentExpirationInfo = document.getElementById('current-expiration-info');
     // ★ IDではなく、クラスを持つ "すべて" の画像入力欄を対象にするコンテナを取得
     const imageInputContainer = document.getElementById('image-input-container');
     const submitButton = document.getElementById('submitButton');
     const messageArea = document.getElementById('message-area');
-
+let isPremiumUser = false;
 
 
 
@@ -30,8 +34,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     currentUser = user;
 
-    async function initializePage() {
-
+    async function initializePage() {const { data: profile } = await supabaseClient.from('users').select('premium_flag').eq('id', currentUser.id).single();
+            isPremiumUser = profile?.premium_flag === true;
+        if (isPremiumUser) {
+            expireSelect.style.display = 'none';// 通常のセレクトボックスを隠す
+            premiumExpireArea.style.display = 'block';// プレミアム用の入力欄を表示
+        }
 
         if (isEditMode) {
             pageTitle.textContent = '投稿を編集する';
@@ -67,8 +75,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             textInput.value = post.text;
             // 1. 公開期限の設定
             if (post.delete_date) {
-                // (この部分は、DBの保存形式と<select>のvalueをどう合わせるかで実装が変わります)
-                // 例: expireSelect.value = '7days';
+                const expirationDate = new Date(post.delete_date);
+                if (expirationDate > new Date()) {
+                    currentExpirationInfo.textContent = `現在の期限: ${expirationDate.toLocaleDateString('ja-JP')}`;
+                    currentExpirationInfo.style.display = 'block';
+                    if (isPremiumUser) {
+                        // datetime-localの形式 'YYYY-MM-DDThh:mm' に合わせる
+                        const year = expirationDate.getFullYear();
+                        const month = String(expirationDate.getMonth() + 1).padStart(2, '0');
+                        const day = String(expirationDate.getDate()).padStart(2, '0');
+                        const hours = String(expirationDate.getHours()).padStart(2, '0');
+                        const minutes = String(expirationDate.getMinutes()).padStart(2, '0');
+
+                        premiumExpireInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+                    }
+                }
             } else {
                 expireSelect.value = 'permanent';
             }
@@ -354,14 +375,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     /**
      * 公開期限の日時を計算する関数
      */
-    function calculateDeleteDate(expiresOption) {
-        if (expiresOption === 'permanent') return null;
+    function calculateDeleteDate() {
+        if (isPremiumUser) {
+            // --- プレミアム会員の場合 ---
+            const dateValue = premiumExpireInput.value;
+            if (dateValue) {
+                // 入力された日時をそのままDateオブジェクトにして返す
+                return new Date(dateValue).toISOString();
+            } else {
+                // 空欄なら無期限
+                return null;
+            }
+        } else {
+            // --- 通常会員の場合 ---
+            const expiresOption = expireSelect.value;
+            if (expiresOption === 'permanent') return null;
 
-        const date = new Date();
-        if (expiresOption === 'private') return date;
-        const days = parseInt(expiresOption.replace('day', ''));
-        date.setDate(date.getDate() + days);
-        return date.toISOString();
+            const date = new Date();
+            if (expiresOption === 'private') return date;
+
+            const days = parseInt(expiresOption.replace('days', ''));
+            date.setDate(date.getDate() + days);
+            return date.toISOString();
+        }
     }
     initializePage();
 
