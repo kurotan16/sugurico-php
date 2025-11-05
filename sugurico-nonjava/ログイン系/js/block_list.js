@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // --- 1. ログイン状態をチェック ---
     const { data: { user: currentUser } } = await supabaseClient.auth.getUser();
     if (!currentUser) {
-        window.location.html = 'login.html'; // 未ログインならリダイレクト
+        window.location.href = 'login.html'; // 未ログインならリダイレクト
         return;
     }
 
@@ -23,10 +23,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .from('blocks')
                 .select(`
                     blocked_user_id,
-                    users!blocks_blocked_user_id_fkey ( username )
+                    users!blocks_blocked_user_id_fkey ( user_name )
                 `)
                 .eq('blocker_user_id', currentUser.id);
-            
+
             if (error) throw error;
 
             if (blockedUsers.length === 0) {
@@ -36,31 +36,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // 取得したデータからHTMLを生成
             listContainer.innerHTML = blockedUsers.map(item => {
-                const blockedUser = escapeHTML(item.users.username);
+                const blockedUser = item.users; // JOINしたusersテーブルのデータ
+                if (!blockedUser) return ''; // 念のため
+
                 return `
                     <div class="post-item">
-                        <div>
-                            <h3>${blockedUser.user_name}</h3>
+                        <div class="post-item-main">
+                            <h3>${escapeHTML(blockedUser.user_name)}</h3>
                         </div>
                         <div class="post-item-actions">
-                            <button
-                            class="action-button unblock-button"
-                            data-user-id="${item.blocked_user_id}"
-                            data-user-name="${blockedUser.user_name}">
-                            ブロック解除
+                            <button 
+                                type="button" 
+                                class="action-button delete-button unblock-button" 
+                                data-user-id="${item.blocked_user_id}"
+                                data-user-name="${escapeHTML(blockedUser.user_name)}">
+                                解除
                             </button>
                         </div>
                     </div>
                 `;
             }).join('');
+
         } catch (error) {
-            console.error('ブロック中ユーザーの取得エラー:', error);
-            listContainer.innerHTML = '<p>ブロック中のユーザーの取得に失敗しました。</p>';
+            console.error('ブロックリストの取得エラー:', error);
+            listContainer.innerHTML = '<p>リストの取得中にエラーが発生しました。</p>';
         }
     }
 
     // --- 2. ページ初期化時にブロックリストを取得・表示 ---
     await fetchAndDisplayBlockedUsers();
+
 
     // --- 3. [解除]ボタンのクリックイベント処理 (イベント委譲) ---
     listContainer.addEventListener('click', async (event) => {
@@ -73,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const targetUserId = button.dataset.userId;
         const targetUserName = button.dataset.userName;
 
-        if (!confirm(`ユーザー 「${targetUserName}」のブロックを解除しますか?`)) {
+        if (!confirm(`ユーザー「${targetUserName}」のブロックを解除しますか？`)) {
             return;
         }
 
@@ -90,17 +95,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert(`「${targetUserName}」のブロックを解除しました。`);
             // リストを再読み込みして表示を更新
             await fetchAndDisplayBlockedUsers();
+
         } catch (error) {
             console.error('ブロック解除エラー:', error);
-            alert('ブロック解除に失敗しました。');
+            alert('ブロックの解除に失敗しました。');
         }
     });
-
-    // XSS対策用のエスケープ関数 (もし共通ファイルになければ)
-    function escapeHTML(str) {
-        if (str === null || str === undefined) {
-            const s = String(str);
-            return s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]);
-        }
-    }
 });
