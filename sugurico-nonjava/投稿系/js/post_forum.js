@@ -13,12 +13,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const premiumExpireArea = document.getElementById('premium-expire-input-area');
     const premiumExpireInput = document.getElementById('premiumExpireInput');
+    const isPrivateCheckbox = document.getElementById('isPrivateCheckbox');
     const currentExpirationInfo = document.getElementById('current-expiration-info');
     // ★ IDではなく、クラスを持つ "すべて" の画像入力欄を対象にするコンテナを取得
     const imageInputContainer = document.getElementById('image-input-container');
     const submitButton = document.getElementById('submitButton');
     const messageArea = document.getElementById('message-area');
-let isPremiumUser = false;
+    let isPremiumUser = false;
 
 
 
@@ -34,11 +35,15 @@ let isPremiumUser = false;
     }
     currentUser = user;
 
-    async function initializePage() {const { data: profile } = await supabaseClient.from('users').select('premium_flag').eq('id', currentUser.id).single();
-            isPremiumUser = profile?.premium_flag === true;
+    async function initializePage() {
+        const { data: profile } = await supabaseClient.from('users').select('premium_flag').eq('id', currentUser.id).single();
+        isPremiumUser = profile?.premium_flag === true;
         if (isPremiumUser) {
             expireSelect.style.display = 'none';// 通常のセレクトボックスを隠す
             premiumExpireArea.style.display = 'block';// プレミアム用の入力欄を表示
+            isPrivateCheckbox.addEventListener('change', () => {
+                premiumExpireInput.disabled = isPrivateCheckbox.checked;
+            });
         }
 
         if (isEditMode) {
@@ -76,7 +81,16 @@ let isPremiumUser = false;
             // 1. 公開期限の設定
             if (post.delete_date) {
                 const expirationDate = new Date(post.delete_date);
-                if (expirationDate > new Date()) {
+                const now = new Date();
+
+                if (expirationDate <= now) {
+                    if (isPremiumUser) {
+                        isPrivateCheckbox.checked = true;
+                        premiumExpireInput.dispatchEvent = true;
+                    } else {
+                        expireSelect.value = 'private';
+                    }
+                } else {
                     currentExpirationInfo.textContent = `現在の期限: ${expirationDate.toLocaleDateString('ja-JP')}`;
                     currentExpirationInfo.style.display = 'block';
                     if (isPremiumUser) {
@@ -91,7 +105,9 @@ let isPremiumUser = false;
                     }
                 }
             } else {
-                expireSelect.value = 'permanent';
+                if (!isPremiumUser) {
+                    expireSelect.value = 'permanent';
+                }
             }
 
 
@@ -378,14 +394,25 @@ let isPremiumUser = false;
     function calculateDeleteDate() {
         if (isPremiumUser) {
             // --- プレミアム会員の場合 ---
+
+            // 1. 「非公開」チェックボックスが最優先
+            if (isPrivateCheckbox.checked) {
+                return new Date().toISOString();// 現在時刻 = 非公開
+            }
+
+            // 2. 日時入力欄の値を見る
             const dateValue = premiumExpireInput.value;
             if (dateValue) {
-                // 入力された日時をそのままDateオブジェクトにして返す
-                return new Date(dateValue).toISOString();
+                const selectedDate = new Date(dateValue);
+                if (selectedDate < new Date()) {
+                    throw new error('公開期限は現在より未来の日時を指定してください。');
+                }
+                return selectedDate.toISOString();
             } else {
-                // 空欄なら無期限
+                // 3. どちらもなければ無期限
                 return null;
             }
+
         } else {
             // --- 通常会員の場合 ---
             const expiresOption = expireSelect.value;
