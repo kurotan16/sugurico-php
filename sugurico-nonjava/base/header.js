@@ -47,7 +47,7 @@ async function setupHeaderAndFooter() {
         // 【ログインしていない場合のナビゲーション】
         navHTML = `
             <a href="../../ログイン系/html/login.html">ログイン</a>
-            <a href="../../ログイン系/html/signin.html">新規登録</a>
+            <a href="../../ログイン系/html/register.html">新規登録</a>
         `;
     }
 
@@ -101,7 +101,7 @@ async function checkAndShowPremiumNotification(user) {
             .from('premium')
             .select('status, limit_date')
             .eq('id', user.id)
-            .single();
+            .maybeSingle();
         if (error || !premium || premium.status !== 'active') {
             return; // プレミアム会員でないか、アクティブでなければ何もしない
         }
