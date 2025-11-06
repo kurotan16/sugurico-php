@@ -23,20 +23,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         // --- 3. 必要なデータを並行して取得 ---
-        let isPremium = false;
+        // プレミアム判定を共通関数に置き換え
+        const isPremium = currentUser ? await isCurrentUserPremium() : false;
         let isBookmarked = false;
 
-        // ログインしている場合のみ、プレミアム情報とブックマーク情報を取得
+        // ログインしている場合のみブックマーク情報を取得
         if (currentUser) {
-            const [profileRes, bookmarkRes] = await Promise.all([
-                supabaseClient.from('users').select('premium_expires_at').eq('id', currentUser.id).single(),
-                supabaseClient.from('bookmark').select('*').eq('user_id', currentUser.id).eq('post_id', forumId).maybeSingle()
-            ]);
-
-            if (profileRes.data && profileRes.data.premium_expires_at && new Date(profileRes.data.premium_expires_at) > new Date()) {
-                isPremium = true;
-            }
-            if (bookmarkRes.data) {
+            const { data: bookmarkRes } = await supabaseClient
+                .from('bookmark')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .eq('post_id', forumId)
+                .maybeSingle();
+            
+            if (bookmarkRes) {
                 isBookmarked = true;
             }
         }
@@ -109,10 +109,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <button type="button" id="bookmark-button" class="${buttonClass}" data-bookmarked="${isBookmarked}">${buttonText}</button>
                 </div>`;
         }
+        
+        let blockButtonHTML = '';
+        // ログインしていて、かつ自分の投稿ではない場合にブロックボタンを表示
+        if (currentUser && post.user_id_auth !== currentUser.id) {
+            blockButtonHTML = `
+                <div class="block-action">
+                    <button type="button" id="block-user-button" class="action-button delete-button" data-target-user-id="${post.user_id_auth}">
+                        このユーザーをブロック
+                    </button>
+                </div>`;
+        }
 
         postContainer.innerHTML = `
             ${ownerButtonsHTML}
             ${bookmarkButtonHTML}
+            ${blockButtonHTML}
             <h1>${escapeHTML(post.title)}</h1>
             <p class="post-meta">投稿者: ${authorHTML}</p>
             <p class="post-meta">投稿日時: ${timeAgoHTML}</p>
@@ -124,6 +136,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // イベントリスナーを設定
         if (isOwner) document.getElementById('delete-post-button').addEventListener('click', () => handleDeletePost(post.forum_id));
         if (isPremium) document.getElementById('bookmark-button').addEventListener('click', handleBookmarkToggle);
+        
+        if (currentUser && post.user_id_auth !== currentUser.id) {
+            document.getElementById('block-user-button').addEventListener('click', handleBlockUser);
+        }
     }
 
     function renderCommentForm() {
@@ -207,6 +223,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('ブックマーク操作エラー:', error);
             alert('ブックマーク操作に失敗しました。');
+        }
+    }
+
+    /**
+     * ユーザーブロック処理
+     */
+    async function handleBlockUser(event) {
+        const button = event.target; // 'botton' -> 'button' に修正
+        const targetUserId = button.dataset.targetUserId;
+        const targetUserName = postContainer.querySelector('a[href^="user_posts.html"]').textContent;
+
+        if (!confirm(`ユーザー「${targetUserName}」をブロックしますか？\nブロックすると、このユーザーの投稿やコメントが表示されなくなります。`)) {
+            return;
+        }
+
+        try {
+            // blockテーブルにブロック情報を追加
+            const { error } = await supabaseClient
+                .from('blocks')
+                .insert({
+                    blocker_user_id: currentUser.id, //ブロック」する側(自分)
+                    blocked_user_id: targetUserId //ブロックされる側(相手)
+                });
+
+            if (error) {
+                if (error.code === '23505') {
+                    alert('このユーザーは既にブロックしています。');
+                } else {
+                    throw error;
+                }
+            } else {
+                alert(`ユーザー「${targetUserName}」をブロックしました。\nページを再読み込みすると反映されます。`);
+                button.textContent = 'ブロック済み';
+                button.disabled = true;
+            }
+
+        } catch (error) {
+            console.error('ユーザーブロックエラー:', error);
+            alert('ユーザーのブロックに失敗しました。');
         }
     }
 });
