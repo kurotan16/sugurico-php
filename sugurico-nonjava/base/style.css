@@ -230,6 +230,7 @@ main {
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     /* 2行で省略 */
     overflow: hidden;
 }
@@ -374,4 +375,33 @@ main {
         width: 100%;
         /* 全幅を使用 */
     }
+}
+
+/* --- プレミアム更新通知バー --- */
+#premium-notification-bar {
+    background-color: #fff3cd; /* 警告色 */
+    color: #856404;
+    padding: 15px 20px;
+    text-align: center;
+    position: relative;
+    display: flex; /* 横並びのため */
+    justify-content: center;
+    align-items: center;
+}
+#premium-notification-bar p {
+    margin: 0;
+    flex-grow: 1; /* テキストができるだけ幅を取るように */
+}
+#premium-notification-bar a {
+    font-weight: bold;
+    text-decoration: underline;
+}
+#premium-notification-bar button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    color: inherit;
+    padding: 0 10px;
 }

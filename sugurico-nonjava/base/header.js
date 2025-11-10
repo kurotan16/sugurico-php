@@ -14,6 +14,13 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
  * ページのヘッダー フッターを動的に生成・表示する関数
  */
 async function setupHeaderAndFooter() {
+
+    const notificationBar = document.createElement('div');
+    notificationBar.id = 'premium-notification-bar';
+    notificationBar.style.display = 'none';
+    document.body.prepend(notificationBar);
+
+
     const headerContainer = document.getElementById('header-container');
     const footerContainer = document.getElementById('footer-container');
 
@@ -28,6 +35,7 @@ async function setupHeaderAndFooter() {
     let navHTML = '';// ナビゲーション部分のHTML
 
     if (session && session.user) {
+        await checkAndShowPremiumNotification(session.user);
         // 【ログインしている場合のナビゲーション】
         const userName = session.user.user_metadata?.user_name || 'ゲスト';
         navHTML = `
@@ -39,7 +47,7 @@ async function setupHeaderAndFooter() {
         // 【ログインしていない場合のナビゲーション】
         navHTML = `
             <a href="../../ログイン系/html/login.html">ログイン</a>
-            <a href="../../ログイン系/html/signin.html">新規登録</a>
+            <a href="../../ログイン系/html/register.html">新規登録</a>
         `;
     }
 
@@ -84,6 +92,54 @@ async function setupHeaderAndFooter() {
                 window.location.href = '../..//メイン系/html/index.html';
             }
         });
+    }
+}
+
+async function checkAndShowPremiumNotification(user) {
+    try {
+        const { data: premium, error } = await supabaseClient
+            .from('premium')
+            .select('status, limit_date')
+            .eq('id', user.id)
+            .maybeSingle();
+        if (error || !premium || premium.status !== 'active') {
+            return; // プレミアム会員でないか、アクティブでなければ何もしない
+        }
+
+        const limitDate = new Date(premium.limit_date);
+        const now = new Date();
+        const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+        // --- 期限が、"現在" と "7日後" の間にあるかをチェック ---
+        if (limitDate > now && limitDate < sevenDaysFromNow) {
+            // --- 今日すでに通知を表示したかチェック ---
+            const lastShownKey = `premium_notify_${user.id}`;
+            const lastShownTimestamp = localStorage.getItem(lastShownKey);
+            const today = new Date().toLocaleDateString();// "2025/8/1" のような日付文字列を取得
+
+            if (lastShownTimestamp === today) {
+                return;// 今日すでに表示済みなら何もしない
+            }
+            const notificationBar = document.getElementById('premium-notification-bar');
+            const daysLeft = Math.ceil((limitDate - now) / (1000 * 60 * 60 * 24));
+
+            notificationBar.innerHTML = `
+            
+                <p>プレミアム会員の有効期限が近づいています。あと${daysLeft}日で自動更新されます。
+                   <a href="../../ログイン系/html/premium_edit.html">会員情報の確認・変更はこちら</a>
+                </p>
+                <button id="close-notification-button">&times;</button>
+            `;
+            notificationBar.style.display = 'flex';
+
+            // --- 通知を閉じる処理 ---
+            document.getElementById('close-notification-button').addEventListener('click', () => {
+                notificationBar.style.display = 'none';
+                localStorage.setItem(lastShownKey, today);
+            });
+        }
+
+    } catch (error) {
+        console.error('プレミアム通知のチェック中にエラー:', error);
     }
 }
 

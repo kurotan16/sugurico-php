@@ -69,7 +69,7 @@ h1, h2 {
 }
 
 /* --- ボタン --- */
-button {
+.change-button {
     padding: 12px 25px;
     font-size: 16px;
     font-weight: bold;
@@ -80,10 +80,10 @@ button {
     cursor: pointer;
     transition: background-color 0.2s;
 }
-button:hover {
+.change-button:hover {
     background-color: var(--primary-hover-color);
 }
-button:disabled {
+.change-button:disabled {
     background-color: #ccc;
     cursor: not-allowed;
 }
