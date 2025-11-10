@@ -98,4 +98,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             submitButton.textContent = '更新する';
         }
     })
+
+    // --- 4. アカウント削除ボタンの処理 ---
+    const deleteButton = document.getElementById('delete-account-button');
+    if (deleteButton) {
+        deleteButton.addEventListener('click', async () => {
+            const confirmation = prompt('アカウント削除の確認のため、あなたのログインIDを入力してください。');
+            if (confirmation === null) return; // キャンセルされた場合
+
+            if (confirmation !== loginIdInput.value) {
+                alert('入力されたログインIDが一致しません。');
+                return;
+            }
+
+            if (!confirm('本当によろしいですか？この操作は元に戻せません。')) {
+                return;
+            }
+
+            try {
+                // 作成したRPCを呼び出す
+                const { error } = await supabaseClient.rpc('delete_current_user');
+                if (error) throw error;
+
+                alert('アカウントを削除しました。ご利用ありがとうございました。');
+                // ログアウト処理をしてトップページにリダイレクト
+                await supabaseClient.auth.signOut();
+                window.location.href = '../../メイン系/html/index.html';
+
+            } catch (error) {
+                console.error('アカウント削除エラー:', error);
+                messageArea.textContent = 'アカウントの削除に失敗しました: ' + error.message;
+                messageArea.className = 'message error';
+                messageArea.style.display = 'block';
+            }
+        });
+    }
+// 誤操作を防ぐため、`prompt` を使ってログインIDを入力させる一手間を加えています。
 });
